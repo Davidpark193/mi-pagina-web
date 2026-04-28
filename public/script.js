@@ -346,67 +346,75 @@ async function guardarSemana() {
 }
 
 // ==================== EXPORTAR PNG ====================
-async function descargar() {
-    calcularHoras();
+function descargar() {
+  calcularHoras();
 
-    const capture = document.getElementById("capture");
-    if (!capture) {
-        alert("No se encontró el elemento #capture");
-        return;
+  const capture = document.getElementById("capture");
+
+  html2canvas(capture, {
+    scale: 3, // 🔥 siempre alta calidad (sirve para ambos)
+    backgroundColor: "#ffffff",
+    logging: false,
+    useCORS: true,
+    scrollX: 0,
+    scrollY: -window.scrollY,
+
+    onclone: (clonedDoc) => {
+      const clonedCapture = clonedDoc.getElementById("capture");
+      if (!clonedCapture) return;
+
+      // 🔥 FORZAR DISEÑO COMO PC (clave)
+      clonedCapture.style.width = "1100px";
+      clonedCapture.style.maxWidth = "1100px";
+      clonedCapture.style.margin = "0 auto";
+      clonedCapture.style.padding = "20px";
+
+      // 🔥 quitar cualquier estilo responsive
+      clonedCapture.style.transform = "none";
+      clonedCapture.style.zoom = "1";
+
+      // 🔥 tabla perfecta
+      const table = clonedCapture.querySelector("table");
+      if (table) {
+        table.style.width = "100%";
+        table.style.tableLayout = "fixed";
+        table.style.borderCollapse = "collapse";
+        table.style.fontSize = "14px";
+      }
+
+      // 🔥 eliminar botones/iconos
+      clonedCapture.querySelectorAll("button").forEach(btn => btn.remove());
+
+      // 🔥 inputs → texto limpio
+      clonedCapture.querySelectorAll("input").forEach(input => {
+        const div = document.createElement("div");
+        div.innerText = input.value || "—";
+        div.style.fontWeight = "500";
+        input.replaceWith(div);
+      });
+
+      // 🔥 selects → texto
+      clonedCapture.querySelectorAll("select").forEach(select => {
+        const div = document.createElement("div");
+        div.innerText = select.value;
+        div.style.fontWeight = "500";
+        select.replaceWith(div);
+      });
+
+      // 🔥 tu función
+      limpiarParaExportarClonada(clonedCapture);
     }
-
-    // Guardar estilos originales
-    const originalStyle = capture.style.cssText;
-    const originalClass = capture.className;
-
-    // Forzar ancho de escritorio
-    capture.style.width = "1200px";
-    capture.style.maxWidth = "1200px";
-    capture.style.margin = "0 auto";
-    capture.classList.add("export-mode");
-
-    try {
-        console.log("🚀 Iniciando html2canvas...");
-
-        const canvas = await html2canvas(capture, {
-            scale: 3,
-            useCORS: true,
-            allowTaint: true,           // ← Importante en servidores
-            backgroundColor: "#ffffff",
-            logging: true,              // Activa logs para ver qué pasa
-            width: 1200,
-            height: capture.scrollHeight || capture.offsetHeight,
-            onclone: (clonedDoc) => {
-                const clonedCapture = clonedDoc.getElementById("capture");
-                if (clonedCapture) {
-                    clonedCapture.classList.add("export-mode");
-                    clonedCapture.style.width = "1200px";
-                    clonedCapture.style.maxWidth = "1200px";
-                    limpiarParaExportarClonada(clonedCapture);
-                }
-            }
-        });
-
-        console.log("✅ Canvas generado correctamente");
-
-        const link = document.createElement("a");
-        const month = document.getElementById("month").value || "Semana";
-        link.download = `Payroll_Week_${month}.png`;
-        link.href = canvas.toDataURL("image/png", 1.0);
-        link.click();
-
-    } catch (err) {
-        console.error("❌ Error completo en html2canvas:", err);
-        console.error("Nombre del error:", err.name);
-        console.error("Mensaje:", err.message);
-        console.error("Stack:", err.stack);
-        
-        alert("Error al generar la imagen.\n\nRevisa la consola (F12) y dime qué error ves.");
-    } finally {
-        // Restaurar
-        capture.style.cssText = originalStyle;
-        capture.className = originalClass;
-    }
+  })
+  .then(canvas => {
+    const link = document.createElement("a");
+    link.download = `Payroll_Week_${document.getElementById("month").value || "Semana"}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  })
+  .catch(err => {
+    console.error("Error real:", err);
+    alert("❌ Error al generar la imagen");
+  });
 }
 
 // ==================== MODALES ====================
