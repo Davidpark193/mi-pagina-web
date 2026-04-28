@@ -526,47 +526,15 @@ select {
 .export-mode {
   width: 1200px !important;
   max-width: 1200px !important;
-  margin: 0 auto !important;
-  padding: 30px !important;
-  box-sizing: border-box;
-  background: white;
+  margin: 20px auto !important;
+  padding: 40px 30px !important;
+  background: white !important;
+  box-shadow: none !important;
 }
 
-.export-mode .container {
-  padding: 0 !important;
-  margin: 0 !important;
-  max-width: none;
-}
-
-.export-mode table {
-  width: 100% !important;
-  table-layout: fixed;
-}
-
-.export-mode th,
-.export-mode td {
-  padding: 16px 12px !important;
-  font-size: 15px !important;
-  white-space: normal !important;
-}
-
-.export-mode .date-cell {
-  min-width: 240px;
-  font-size: 15px;
-}
-
-/* Asegurar que los inputs se oculten bien */
-.export-mode select,
-.export-mode .loc-btn,
-.export-mode .task-search-input {
-  display: none !important;
-}
-
-/* Mejorar total en exportación */
-.export-mode .total-row {
-  padding: 25px 0 !important;
-}
-
-.export-mode .total-value {
-  font-size: 2.1rem !important;
+@media (max-width: 768px) {
+  .export-mode {
+    width: 1000px !important;     /* más pequeño en móvil */
+    padding: 25px 20px !important;
+  }
 }

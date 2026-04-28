@@ -350,60 +350,76 @@ function descargar() {
   calcularHoras();
 
   const capture = document.getElementById("capture");
+  const originalWidth = capture.style.width;
 
-  // Forzar modo escritorio durante la captura
+  // Forzar modo exportación
   capture.classList.add("export-mode");
 
+  // Configuración más amigable para móviles
+  const isMobile = window.innerWidth < 768;
+  const scale = isMobile ? 2 : 3;
+
   html2canvas(capture, {
-    scale: 3,                    // Alta calidad (2 en móviles si quieres más velocidad)
+    scale: scale,
     backgroundColor: "#ffffff",
     logging: false,
-    width: 1200,                 // Ancho fijo (importante para consistencia)
-    height: capture.scrollHeight,
     useCORS: true,
     allowTaint: true,
+    width: capture.offsetWidth,      // Usar ancho real en vez de fijo
+    height: capture.scrollHeight,
+    scrollX: 0,
+    scrollY: 0,
+
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
       if (!clonedCapture) return;
 
       clonedCapture.classList.add("export-mode");
+
+      // Limpieza para exportar
       limpiarParaExportarClonada(clonedCapture);
 
-      // === FORZAR ESTILO DE ESCRITORIO EN MÓVIL ===
-      clonedCapture.style.width = "1200px";
-      clonedCapture.style.maxWidth = "1200px";
+      // Forzar estilos importantes
+      clonedCapture.style.width = isMobile ? "1000px" : "1200px";
+      clonedCapture.style.maxWidth = "none";
       clonedCapture.style.margin = "0 auto";
       clonedCapture.style.boxShadow = "none";
+      clonedCapture.style.padding = "30px";
 
-      // Desactivar todas las media queries móviles
-      const style = clonedDoc.createElement('style');
+      // Evitar problemas de media queries en móvil
+      const style = clonedDoc.createElement("style");
       style.innerHTML = `
         @media (max-width: 768px) {
-          table, thead, tbody, tr, th, td {
-            display: table !important;
-            width: 100% !important;
-            overflow-x: visible !important;
-            white-space: normal !important;
+          table, thead, tbody, tr, th, td { 
+            display: table !important; 
+            width: 100% !important; 
           }
-          .task-search-input, select, .loc-btn {
-            display: none !important;
-          }
+          .task-search-input, select, .loc-btn { display: none !important; }
         }
       `;
       clonedDoc.head.appendChild(style);
     }
   }).then(canvas => {
     const link = document.createElement("a");
-    const fecha = document.getElementById("month").value.replace(/ /g, "_") || "Semana";
-    link.download = `Payroll_Week_${fecha}.png`;
-    link.href = canvas.toDataURL("image/png", 1.0);
+    const month = document.getElementById("month").value.replace(/[^a-zA-Z0-9]/g, "_") || "Semana";
+    link.download = `Payroll_${month}.png`;
+    link.href = canvas.toDataURL("image/png", 0.95);   // 0.95 para reducir tamaño
     link.click();
 
-    // Quitar clase después de capturar
+    // Restaurar
     capture.classList.remove("export-mode");
+    console.log("✅ PNG generado correctamente");
+
   }).catch(err => {
-    console.error("Error html2canvas:", err);
-    alert("Error al generar la imagen. Inténtalo de nuevo.");
+    console.error("html2canvas error:", err);
+    
+    // Mensaje más útil
+    if (isMobile) {
+      alert("❌ Error en móvil.\n\nSolución:\n1. Cierra pestañas abiertas\n2. Prueba en modo horizontal\n3. O usa la versión PC");
+    } else {
+      alert("❌ Error al generar la imagen.\n\nInténtalo de nuevo o refresca la página.");
+    }
+
     capture.classList.remove("export-mode");
   });
 }
