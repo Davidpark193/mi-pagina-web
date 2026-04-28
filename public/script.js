@@ -536,7 +536,7 @@ async function verDetallesSemana(id) {
     const response = await fetch(`/api/semanas/${id}`);
     const data = await response.json();
 
-    const rows = data.rows || data; // por si el backend devuelve diferente
+    const rows = data.rows || data;
     let filasHTML = '';
     let totalHoras = 0;
 
@@ -561,6 +561,21 @@ async function verDetallesSemana(id) {
             <h2>Detalles de la Semana</h2>
             <button onclick="cerrarModalDetalle()" class="btn-close">✕</button>
           </div>
+
+          <!-- NUEVO: Employee + Month -->
+          <div class="info-bar-modal">
+            <div class="info-group">
+              <div class="info-item">
+                <label>Employee</label>
+                <strong>Cristian Farez</strong>
+              </div>
+              <div class="info-item">
+                <label>Month</label>
+                <strong>${data.month || document.getElementById("month").value || "APRIL - MAY"}</strong>
+              </div>
+            </div>
+          </div>
+
           <div class="modal-body">
             <table class="detalle-table">
               <thead>
@@ -575,16 +590,15 @@ async function verDetallesSemana(id) {
               <tbody>${filasHTML}</tbody>
             </table>
 
-            <!-- TOTAL HOURS -->
+            <!-- Total -->
             <div class="total-row-modal">
               <span class="total-label">Total Hours:</span>
               <span class="total-value">${totalHoras.toFixed(1)}</span>
             </div>
           </div>
+
           <div class="modal-footer">
-            <button onclick="descargarDetalle(${id})" class="btn-success">
-              📥 Descargar como PNG
-            </button>
+            <button onclick="descargarDetalle(${id})" class="btn-success">📥 Descargar como PNG</button>
             <button onclick="cerrarModalDetalle()" class="btn-secondary">Volver</button>
           </div>
         </div>
@@ -596,7 +610,7 @@ async function verDetallesSemana(id) {
 
   } catch (error) {
     console.error(error);
-    alert("Error al cargar los detalles de la semana.");
+    alert("Error al cargar los detalles.");
   }
 }
 
@@ -612,14 +626,19 @@ function descargarDetalle(id) {
     onclone: (clonedDoc) => {
       const clonedModal = clonedDoc.getElementById('modal-detalle');
       if (clonedModal) {
-        clonedModal.style.width = "1100px";
+        // Ocultar botones al exportar
+        const footer = clonedModal.querySelector('.modal-footer');
+        if (footer) footer.style.display = 'none';
+
+        clonedModal.style.width = "1150px";
         clonedModal.style.margin = "0 auto";
         clonedModal.style.padding = "20px";
       }
     }
   }).then(canvas => {
     const link = document.createElement("a");
-    link.download = `Detalle_Semana_${id}.png`;
+    const month = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+    link.download = `Detalle_Semana_${month}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   });

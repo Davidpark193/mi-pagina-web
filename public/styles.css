@@ -711,3 +711,35 @@ select {
     background: #10b981;
     color: white;
 }
+
+.info-bar-modal {
+    background: #f8fafc;
+    padding: 18px 25px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.info-bar-modal .info-group {
+    display: flex;
+    gap: 40px;
+}
+
+.info-bar-modal .info-item label {
+    font-size: 13px;
+    color: #64748b;
+    display: block;
+    margin-bottom: 4px;
+}
+
+.info-bar-modal strong {
+    font-size: 16.5px;
+}
+
+/* Asegurar que los botones se oculten bien */
+.modal-footer {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    padding: 20px;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
