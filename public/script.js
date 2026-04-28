@@ -350,76 +350,67 @@ function descargar() {
   calcularHoras();
 
   const capture = document.getElementById("capture");
-  const originalWidth = capture.style.width;
 
-  // Forzar modo exportación
+  // Forzar modo exportación limpio
   capture.classList.add("export-mode");
 
-  // Configuración más amigable para móviles
-  const isMobile = window.innerWidth < 768;
-  const scale = isMobile ? 2 : 3;
-
   html2canvas(capture, {
-    scale: scale,
+    scale: 2,                    // Bajamos a 2 para evitar sobrecarga de memoria
     backgroundColor: "#ffffff",
-    logging: false,
+    logging: true,               // Activa logs para ver errores en consola
     useCORS: true,
     allowTaint: true,
-    width: capture.offsetWidth,      // Usar ancho real en vez de fijo
-    height: capture.scrollHeight,
     scrollX: 0,
     scrollY: 0,
+    ignoreElements: (element) => {
+      // Ignorar elementos que suelen causar problemas
+      return element.classList.contains('loc-btn') || 
+             element.tagName === 'SELECT';
+    },
 
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
       if (!clonedCapture) return;
 
       clonedCapture.classList.add("export-mode");
-
-      // Limpieza para exportar
       limpiarParaExportarClonada(clonedCapture);
 
-      // Forzar estilos importantes
-      clonedCapture.style.width = isMobile ? "1000px" : "1200px";
-      clonedCapture.style.maxWidth = "none";
+      // Estilos forzados más seguros
+      clonedCapture.style.width = "1100px";
+      clonedCapture.style.maxWidth = "1100px";
       clonedCapture.style.margin = "0 auto";
+      clonedCapture.style.padding = "40px 30px";
       clonedCapture.style.boxShadow = "none";
-      clonedCapture.style.padding = "30px";
+      clonedCapture.style.background = "white";
 
-      // Evitar problemas de media queries en móvil
-      const style = clonedDoc.createElement("style");
-      style.innerHTML = `
-        @media (max-width: 768px) {
-          table, thead, tbody, tr, th, td { 
-            display: table !important; 
-            width: 100% !important; 
-          }
-          .task-search-input, select, .loc-btn { display: none !important; }
+      // Estilo extra para evitar conflictos
+      const extraStyle = clonedDoc.createElement("style");
+      extraStyle.innerHTML = `
+        body { margin: 0; padding: 0; }
+        .export-mode table { table-layout: fixed; width: 100% !important; }
+        .export-mode td, .export-mode th { 
+          padding: 14px 10px !important; 
+          font-size: 15px !important;
         }
+        .export-mode .total-row { padding: 30px 0 !important; }
       `;
-      clonedDoc.head.appendChild(style);
+      clonedDoc.head.appendChild(extraStyle);
     }
   }).then(canvas => {
     const link = document.createElement("a");
-    const month = document.getElementById("month").value.replace(/[^a-zA-Z0-9]/g, "_") || "Semana";
+    const month = (document.getElementById("month").value || "Semana").replace(/[^a-zA-Z0-9]/g, "_");
     link.download = `Payroll_${month}.png`;
-    link.href = canvas.toDataURL("image/png", 0.95);   // 0.95 para reducir tamaño
+    link.href = canvas.toDataURL("image/png", 0.92);
     link.click();
 
-    // Restaurar
-    capture.classList.remove("export-mode");
-    console.log("✅ PNG generado correctamente");
+    console.log("✅ Imagen generada correctamente");
+    alert("✅ PNG descargado con éxito!");
 
   }).catch(err => {
-    console.error("html2canvas error:", err);
-    
-    // Mensaje más útil
-    if (isMobile) {
-      alert("❌ Error en móvil.\n\nSolución:\n1. Cierra pestañas abiertas\n2. Prueba en modo horizontal\n3. O usa la versión PC");
-    } else {
-      alert("❌ Error al generar la imagen.\n\nInténtalo de nuevo o refresca la página.");
-    }
-
+    console.error("❌ Error completo de html2canvas:", err);
+    alert("❌ Error al generar PNG.\n\nRevisa la consola (F12) y dime qué error ves.");
+    capture.classList.remove("export-mode");
+  }).finally(() => {
     capture.classList.remove("export-mode");
   });
 }

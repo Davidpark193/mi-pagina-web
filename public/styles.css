@@ -524,17 +524,25 @@ select {
 }
 
 .export-mode {
-  width: 1200px !important;
-  max-width: 1200px !important;
-  margin: 20px auto !important;
+  width: 1100px !important;
+  max-width: 1100px !important;
+  margin: 0 auto !important;
   padding: 40px 30px !important;
   background: white !important;
   box-shadow: none !important;
+  position: relative !important;
 }
 
-@media (max-width: 768px) {
-  .export-mode {
-    width: 1000px !important;     /* más pequeño en móvil */
-    padding: 25px 20px !important;
-  }
+.export-mode .container,
+.export-mode .card-main {
+  box-shadow: none !important;
+  padding: 0 !important;
+}
+
+/* Ocultar elementos interactivos */
+.export-mode select,
+.export-mode .loc-btn,
+.export-mode .task-search-input,
+.export-mode .task-options {
+  display: none !important;
 }
