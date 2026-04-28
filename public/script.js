@@ -351,23 +351,17 @@ function descargar() {
 
   const capture = document.getElementById("capture");
 
-  // Forzar modo exportación limpio
+  // Forzar modo escritorio durante la captura
   capture.classList.add("export-mode");
 
   html2canvas(capture, {
-    scale: 2,                    // Bajamos a 2 para evitar sobrecarga de memoria
+    scale: 3,                    // Alta calidad (2 en móviles si quieres más velocidad)
     backgroundColor: "#ffffff",
-    logging: true,               // Activa logs para ver errores en consola
+    logging: false,
+    width: 1200,                 // Ancho fijo (importante para consistencia)
+    height: capture.scrollHeight,
     useCORS: true,
     allowTaint: true,
-    scrollX: 0,
-    scrollY: 0,
-    ignoreElements: (element) => {
-      // Ignorar elementos que suelen causar problemas
-      return element.classList.contains('loc-btn') || 
-             element.tagName === 'SELECT';
-    },
-
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
       if (!clonedCapture) return;
@@ -375,42 +369,41 @@ function descargar() {
       clonedCapture.classList.add("export-mode");
       limpiarParaExportarClonada(clonedCapture);
 
-      // Estilos forzados más seguros
-      clonedCapture.style.width = "1100px";
-      clonedCapture.style.maxWidth = "1100px";
+      // === FORZAR ESTILO DE ESCRITORIO EN MÓVIL ===
+      clonedCapture.style.width = "1200px";
+      clonedCapture.style.maxWidth = "1200px";
       clonedCapture.style.margin = "0 auto";
-      clonedCapture.style.padding = "40px 30px";
       clonedCapture.style.boxShadow = "none";
-      clonedCapture.style.background = "white";
 
-      // Estilo extra para evitar conflictos
-      const extraStyle = clonedDoc.createElement("style");
-      extraStyle.innerHTML = `
-        body { margin: 0; padding: 0; }
-        .export-mode table { table-layout: fixed; width: 100% !important; }
-        .export-mode td, .export-mode th { 
-          padding: 14px 10px !important; 
-          font-size: 15px !important;
+      // Desactivar todas las media queries móviles
+      const style = clonedDoc.createElement('style');
+      style.innerHTML = `
+        @media (max-width: 768px) {
+          table, thead, tbody, tr, th, td {
+            display: table !important;
+            width: 100% !important;
+            overflow-x: visible !important;
+            white-space: normal !important;
+          }
+          .task-search-input, select, .loc-btn {
+            display: none !important;
+          }
         }
-        .export-mode .total-row { padding: 30px 0 !important; }
       `;
-      clonedDoc.head.appendChild(extraStyle);
+      clonedDoc.head.appendChild(style);
     }
   }).then(canvas => {
     const link = document.createElement("a");
-    const month = (document.getElementById("month").value || "Semana").replace(/[^a-zA-Z0-9]/g, "_");
-    link.download = `Payroll_${month}.png`;
-    link.href = canvas.toDataURL("image/png", 0.92);
+    const fecha = document.getElementById("month").value.replace(/ /g, "_") || "Semana";
+    link.download = `Payroll_Week_${fecha}.png`;
+    link.href = canvas.toDataURL("image/png", 1.0);
     link.click();
 
-    console.log("✅ Imagen generada correctamente");
-    alert("✅ PNG descargado con éxito!");
-
-  }).catch(err => {
-    console.error("❌ Error completo de html2canvas:", err);
-    alert("❌ Error al generar PNG.\n\nRevisa la consola (F12) y dime qué error ves.");
+    // Quitar clase después de capturar
     capture.classList.remove("export-mode");
-  }).finally(() => {
+  }).catch(err => {
+    console.error("Error html2canvas:", err);
+    alert("Error al generar la imagen. Inténtalo de nuevo.");
     capture.classList.remove("export-mode");
   });
 }
