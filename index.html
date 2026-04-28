@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payroll • Weekly Time Sheet</title>
+  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="header">
+    <h1>Payroll • Weekly Time Sheet</h1>
+    <div class="header-actions">
+      <button class="btn-primary" onclick="guardarSemana()">Guardar Semana</button>
+      <button class="btn-success" onclick="descargar()">Exportar como PNG</button>
+      <button onclick="verSemanasGuardadas()" class="btn-view">📋 Ver Semanas Guardadas</button>
+    </div>
+  </div>
+  
+  <div class="container">
+    <div class="card-main" id="capture">
+    
+      <!-- Barra de información -->
+      <div class="info-bar">
+        <div class="info-group">
+          <div class="info-item">
+            <label>Employee</label>
+            <input type="text" id="employee" value="Cristian Farez" readonly>
+          </div>
+          <div class="info-item">
+            <label>Month</label>
+            <input type="text" id="month" readonly>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabla -->
+      <table id="tabla">
+        <thead>
+          <tr>
+            <th>Date</th>
+            <th>Place / Location</th>
+            <th>Notes / Task</th>
+            <th>Time</th>
+            <th>Hours</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
+
+      <!-- Total -->
+      <div class="total-row" id="total-row">
+        <div class="total-content">
+          <span class="total-label">Total Hours:</span>
+          <span id="total" class="total-value" data-total="0">0.0</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
