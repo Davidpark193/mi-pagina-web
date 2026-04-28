@@ -352,48 +352,47 @@ function descargar() {
   const capture = document.getElementById("capture");
 
   html2canvas(capture, {
-    scale: window.innerWidth < 768 ? 4 : 3, // 📱 más calidad en móvil
+    scale: window.innerWidth < 768 ? 2 : 3, // 🔥 clave para móvil
     backgroundColor: "#ffffff",
     logging: false,
+    useCORS: true,
 
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
       if (!clonedCapture) return;
 
-      // 🔥 FORZAR VISTA TIPO PC
-      clonedCapture.style.width = "1200px";
-      clonedCapture.style.maxWidth = "1200px";
+      // 🔥 FORZAR DISEÑO COMO PC (sin romper)
+      clonedCapture.style.width = "1000px";
+      clonedCapture.style.maxWidth = "1000px";
       clonedCapture.style.margin = "0 auto";
-      clonedCapture.style.padding = "20px";
 
-      // 🔥 evitar que se vea comprimido
-      clonedCapture.style.transform = "scale(1)";
-      clonedCapture.style.transformOrigin = "top left";
+      // ❌ quitamos cosas peligrosas
+      clonedCapture.style.transform = "none";
 
       // 🔥 tabla bien distribuida
       const table = clonedCapture.querySelector("table");
       if (table) {
         table.style.width = "100%";
         table.style.tableLayout = "fixed";
+        table.style.fontSize = "14px";
       }
 
-      // 🔥 ocultar botones en exportación
-      clonedCapture.querySelectorAll("button").forEach(btn => {
-        btn.style.display = "none";
-      });
+      // 🔥 eliminar botones (mejor que display:none)
+      clonedCapture.querySelectorAll("button").forEach(btn => btn.remove());
 
-      // 🔥 limpiar inputs (tu función)
+      // 🔥 tu función (la dejamos igual)
       limpiarParaExportarClonada(clonedCapture);
     }
-
-  }).then(canvas => {
+  })
+  .then(canvas => {
     const link = document.createElement("a");
     link.download = `Payroll_Week_${document.getElementById("month").value || "Semana"}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
-  }).catch(err => {
-    console.error("Error al generar PNG:", err);
-    alert("Hubo un error al generar la imagen.");
+  })
+  .catch(err => {
+    console.error("Error real:", err);
+    alert("❌ Error al generar la imagen en móvil");
   });
 }
 
