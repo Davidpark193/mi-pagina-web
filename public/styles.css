@@ -678,3 +678,36 @@ select {
         margin-left: 0;
     }
 }
+
+/* TOTAL EN MODAL */
+.total-row-modal {
+    background: #1e2937;
+    color: white;
+    padding: 15px 20px;
+    margin-top: 10px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+.total-row-modal .total-value {
+    color: #34d399;
+}
+
+/* Footer del modal */
+.modal-footer {
+    padding: 20px;
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    background: #f8fafc;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}

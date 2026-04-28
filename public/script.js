@@ -534,17 +534,23 @@ async function eliminarSemana(id) {
 async function verDetallesSemana(id) {
   try {
     const response = await fetch(`/api/semanas/${id}`);
-    const rows = await response.json();
+    const data = await response.json();
 
+    const rows = data.rows || data; // por si el backend devuelve diferente
     let filasHTML = '';
+    let totalHoras = 0;
+
     rows.forEach(row => {
+      const horas = parseFloat(row.hours) || 0;
+      totalHoras += horas;
+
       filasHTML += `
         <tr>
           <td>${row.date || ''}</td>
           <td>${row.place || '—'}</td>
           <td>${row.task || '—'}</td>
           <td style="text-align:center;">${row.time || '—'}</td>
-          <td style="text-align:center; font-weight:600; color:#10b981;">${row.hours || '0.0'}</td>
+          <td style="text-align:center; font-weight:700; color:#10b981;">${horas.toFixed(1)}</td>
         </tr>`;
     });
 
@@ -568,15 +574,23 @@ async function verDetallesSemana(id) {
               </thead>
               <tbody>${filasHTML}</tbody>
             </table>
+
+            <!-- TOTAL HOURS -->
+            <div class="total-row-modal">
+              <span class="total-label">Total Hours:</span>
+              <span class="total-value">${totalHoras.toFixed(1)}</span>
+            </div>
           </div>
           <div class="modal-footer">
+            <button onclick="descargarDetalle(${id})" class="btn-success">
+              📥 Descargar como PNG
+            </button>
             <button onclick="cerrarModalDetalle()" class="btn-secondary">Volver</button>
           </div>
         </div>
       </div>
     `;
 
-    // Remover modal anterior si existe
     if (document.getElementById('modal-detalle')) document.getElementById('modal-detalle').remove();
     document.body.insertAdjacentHTML('beforeend', detalleHTML);
 
@@ -584,6 +598,31 @@ async function verDetallesSemana(id) {
     console.error(error);
     alert("Error al cargar los detalles de la semana.");
   }
+}
+
+// Descargar solo el modal de detalles como PNG
+function descargarDetalle(id) {
+  const modal = document.getElementById('modal-detalle');
+  if (!modal) return;
+
+  html2canvas(modal, {
+    scale: 3,
+    backgroundColor: "#ffffff",
+    logging: false,
+    onclone: (clonedDoc) => {
+      const clonedModal = clonedDoc.getElementById('modal-detalle');
+      if (clonedModal) {
+        clonedModal.style.width = "1100px";
+        clonedModal.style.margin = "0 auto";
+        clonedModal.style.padding = "20px";
+      }
+    }
+  }).then(canvas => {
+    const link = document.createElement("a");
+    link.download = `Detalle_Semana_${id}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
 }
 
 function cerrarModal() {
