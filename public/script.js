@@ -347,65 +347,91 @@ async function guardarSemana() {
 
 // ==================== EXPORTAR PNG ====================
 function descargar() {
-  calcularHoras();
+    calcularHoras();
 
-  const capture = document.getElementById("capture");
+    const capture = document.getElementById("capture");
 
-  // Forzar modo escritorio durante la captura
-  capture.classList.add("export-mode");
+    html2canvas(capture, {
+        scale: 3,
+        backgroundColor: "#ffffff",
+        logging: false,
+        onclone: (clonedDoc) => {
+            const clonedCapture = clonedDoc.getElementById("capture");
+            if (!clonedCapture) return;
 
-  html2canvas(capture, {
-    scale: 3,                    // Alta calidad (2 en móviles si quieres más velocidad)
-    backgroundColor: "#ffffff",
-    logging: false,
-    width: 1200,                 // Ancho fijo (importante para consistencia)
-    height: capture.scrollHeight,
-    useCORS: true,
-    allowTaint: true,
-    onclone: (clonedDoc) => {
-      const clonedCapture = clonedDoc.getElementById("capture");
-      if (!clonedCapture) return;
-
-      clonedCapture.classList.add("export-mode");
-      limpiarParaExportarClonada(clonedCapture);
-
-      // === FORZAR ESTILO DE ESCRITORIO EN MÓVIL ===
-      clonedCapture.style.width = "1200px";
-      clonedCapture.style.maxWidth = "1200px";
-      clonedCapture.style.margin = "0 auto";
-      clonedCapture.style.boxShadow = "none";
-
-      // Desactivar todas las media queries móviles
-      const style = clonedDoc.createElement('style');
-      style.innerHTML = `
-        @media (max-width: 768px) {
-          table, thead, tbody, tr, th, td {
-            display: table !important;
-            width: 100% !important;
-            overflow-x: visible !important;
-            white-space: normal !important;
-          }
-          .task-search-input, select, .loc-btn {
-            display: none !important;
-          }
+            clonedCapture.classList.add("export-mode");
+            limpiarParaExportarClonada(clonedCapture);
         }
-      `;
-      clonedDoc.head.appendChild(style);
-    }
-  }).then(canvas => {
-    const link = document.createElement("a");
-    const fecha = document.getElementById("month").value.replace(/ /g, "_") || "Semana";
-    link.download = `Payroll_Week_${fecha}.png`;
-    link.href = canvas.toDataURL("image/png", 1.0);
-    link.click();
+    })
+    .then(canvas => {
+        const link = document.createElement("a");
 
-    // Quitar clase después de capturar
-    capture.classList.remove("export-mode");
-  }).catch(err => {
-    console.error("Error html2canvas:", err);
-    alert("Error al generar la imagen. Inténtalo de nuevo.");
-    capture.classList.remove("export-mode");
-  });
+        const monthValue = document.getElementById("month").value || "Semana";
+        link.download = `Payroll_Week_${monthValue}.png`;
+
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    })
+    .catch(err => {
+        console.error("Error al generar PNG:", err);
+        alert("Hubo un error al generar la imagen.");
+    });
+}
+
+
+function limpiarParaExportarClonada(captureElement) {
+    const rows = captureElement.querySelectorAll("#tabla tbody tr");
+
+    rows.forEach(fila => {
+        // Lugar / Dirección
+        const select = fila.querySelector("select");
+        const direccion = fila.querySelector(".editable");
+
+        const textoLugar =
+            (direccion && direccion.innerText.trim()) ||
+            (select && select.value) ||
+            "HOUSE 34 Seaview Montauk";
+
+        const nuevoDivLugar = document.createElement("div");
+        nuevoDivLugar.style.fontWeight = "500";
+        nuevoDivLugar.innerText = textoLugar;
+
+        fila.cells[1].innerHTML = "";
+        fila.cells[1].appendChild(nuevoDivLugar);
+
+        // Task
+        const taskInput = fila.querySelector(".task-search-input");
+
+        if (taskInput) {
+            const taskText = taskInput.value.trim() || "—";
+
+            const taskDiv = document.createElement("div");
+            taskDiv.style.fontWeight = "500";
+            taskDiv.innerText = taskText;
+
+            fila.cells[2].innerHTML = "";
+            fila.cells[2].appendChild(taskDiv);
+        }
+
+        // Time
+        const timeCell = fila.cells[3];
+        const timeText = timeCell.innerText.trim() || "—";
+
+        const timeDiv = document.createElement("div");
+        timeDiv.style.fontWeight = "500";
+        timeDiv.innerText = timeText;
+
+        fila.cells[3].innerHTML = "";
+        fila.cells[3].appendChild(timeDiv);
+    });
+
+    // Total
+    const totalEl = captureElement.querySelector("#total");
+
+    if (totalEl) {
+        const totalValor = totalEl.getAttribute("data-total") || "0.0";
+        totalEl.innerText = parseFloat(totalValor).toFixed(1);
+    }
 }
 
 // ==================== MODALES ====================
