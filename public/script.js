@@ -64,14 +64,21 @@ function actualizarMes(lunes) {
 function generarSemana() {
   const body = document.getElementById("body");
   body.innerHTML = "";
-  let dia = semanaBase.getDay();
+
+  // === FORZAR INICIO DE SEMANA EN LUNES ===
   let lunes = new Date(semanaBase);
-  lunes.setDate(semanaBase.getDate() - (dia === 0 ? 6 : dia - 1));
+  lunes.setHours(0, 0, 0, 0); // Limpiar hora
+
+  const dia = lunes.getDay();
+  const diff = lunes.getDate() - dia + (dia === 0 ? -6 : 1); // Lunes
+  lunes.setDate(diff);
+
   actualizarMes(lunes);
 
   for (let i = 0; i < 7; i++) {
     let d = new Date(lunes);
     d.setDate(lunes.getDate() + i);
+
     const row = document.createElement('tr');
     row.innerHTML = `
       <td class="date-cell" contenteditable="true">${fechaUSA(d)}</td>
@@ -92,8 +99,6 @@ function generarSemana() {
             <option>HOUSE 41 Montauk Ave Sag Harbor</option>
             <option>HOUSE 23 Roberson Blv Sag Harbor</option>
             <option>HOUSE 34 High St</option>
-            
-            <!-- Opciones anteriores -->
             <option>HOUSE 34 Montauk</option>
             <option>HOUSE 69 Montauk</option>
             <option>Other Location</option>
@@ -104,11 +109,8 @@ function generarSemana() {
       </td>
       <td>
         <div class="task-search-container">
-          <input type="text"
-                 class="task-search-input"
-                 placeholder="Buscar o escribir tarea..."
-                 onfocus="mostrarOpciones(this)"
-                 oninput="filtrarOpciones(this); limpiarHorasAlEscribir(this)">
+          <input type="text" class="task-search-input" placeholder="Buscar o escribir tarea..." 
+                 onfocus="mostrarOpciones(this)" oninput="filtrarOpciones(this); limpiarHorasAlEscribir(this)">
           <div class="task-options" style="display:none;"></div>
         </div>
       </td>
@@ -126,6 +128,13 @@ function generarSemana() {
       }, 150);
     });
   }
+}
+
+// Botón para resetear a la semana actual (útil cuando se desincroniza)
+function resetearSemanaActual() {
+  semanaBase = new Date();
+  generarSemana();
+  alert("✅ Semana reiniciada a la actual");
 }
 
 function obtenerDireccion(btn) {

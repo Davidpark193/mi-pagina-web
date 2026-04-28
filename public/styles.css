@@ -652,3 +652,29 @@ select {
         padding: 10px 6px;
     }
 }
+
+.btn-reset {
+    background: #64748b;
+    color: white;
+    border: none;
+    padding: 10px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-left: 8px;
+}
+
+.btn-reset:hover {
+    background: #475569;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .header-actions {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .btn-reset {
+        margin-left: 0;
+    }
+}
