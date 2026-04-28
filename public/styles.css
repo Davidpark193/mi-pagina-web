@@ -551,3 +551,24 @@ select {
 #capture td:nth-child(3) { width: 30%; }  /* Task */
 #capture td:nth-child(4) { width: 17%; }  /* Time */
 #capture td:nth-child(5) { width: 13%; }  /* Hours */
+
+/* ====================== ENCABEZADOS (HEADERS) ====================== */
+
+#capture.export-mode th {
+    background: #1e2937 !important;
+    color: white !important;
+    text-align: center !important;
+    vertical-align: middle !important;
+    padding: 14px 10px !important;
+    font-size: 15px !important;
+    font-weight: 600 !important;
+    white-space: normal !important;
+    line-height: 1.3;
+}
+
+/* Ajuste fino por columna */
+#capture.export-mode th:nth-child(1) { width: 17%; }   /* Date */
+#capture.export-mode th:nth-child(2) { width: 23%; }   /* Place */
+#capture.export-mode th:nth-child(3) { width: 30%; }   /* Task */
+#capture.export-mode th:nth-child(4) { width: 17%; }   /* Time */
+#capture.export-mode th:nth-child(5) { width: 13%; }   /* Hours */

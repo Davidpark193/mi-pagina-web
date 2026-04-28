@@ -361,20 +361,30 @@ function descargar() {
 
             clonedCapture.classList.add("export-mode");
 
-            // === ANCHO QUE FUNCIONA BIEN EN MÓVIL Y PC ===
+            // === ANCHO OPTIMO PARA MÓVIL Y PC ===
             clonedCapture.style.width = "auto";
-            clonedCapture.style.minWidth = "1050px";     // ← Reducido para móvil
-            clonedCapture.style.maxWidth = "1350px";
+            clonedCapture.style.minWidth = "1080px";
+            clonedCapture.style.maxWidth = "1380px";
             clonedCapture.style.margin = "0 auto";
-            clonedCapture.style.padding = "25px 30px";
+            clonedCapture.style.padding = "32px 38px";
             clonedCapture.style.boxSizing = "border-box";
             clonedCapture.style.fontFamily = "Arial, sans-serif";
 
             const tabla = clonedCapture.querySelector("#tabla");
             if (tabla) {
                 tabla.style.width = "100%";
-                tabla.style.tableLayout = "fixed";   // Mejor para evitar desorden
+                tabla.style.tableLayout = "fixed";
             }
+
+            // === MEJORAR ENCABEZADOS ===
+            const headers = clonedCapture.querySelectorAll("th");
+            headers.forEach((th, index) => {
+                th.style.textAlign = "center";
+                th.style.verticalAlign = "middle";
+                th.style.padding = "15px 10px";
+                th.style.fontSize = "15.5px";
+                th.style.fontWeight = "600";
+            });
 
             limpiarParaExportarClonada(clonedCapture);
         }
