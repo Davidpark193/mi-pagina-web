@@ -3,22 +3,13 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "type": "commonjs",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Davidpark193/mi-pagina-web.git"
+  "engines": {
+    "node": "18.x"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs",
-  "bugs": {
-    "url": "https://github.com/Davidpark193/mi-pagina-web/issues"
-  },
-  "homepage": "https://github.com/Davidpark193/mi-pagina-web#readme",
   "dependencies": {
     "body-parser": "^2.2.2",
     "cors": "^2.8.6",
