@@ -1,22 +1,27 @@
-const express = require("express");
-const bodyParser = require("body-parser");
-const cors = require("cors");
-const path = require("path");
+const express = require('express');
+const cors = require('cors');
+const path = require('path');
+const fs = require('fs');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3000;   // ← Muy importante
 
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Servir archivos estáticos (tu HTML)
-app.use(express.static(path.join(__dirname, "public")));
+// Servir archivos estáticos del frontend (HTML, CSS, JS)
+app.use(express.static(path.join(__dirname, '..')));  // sube un nivel
 
-// Ruta de prueba
-app.get("/api", (req, res) => {
-    res.json({ mensaje: "Servidor funcionando 🚀" });
+// Tus rutas API...
+app.get('/api/semanas', (req, res) => { ... });
+app.post('/api/semanas', (req, res) => { ... });
+app.delete('/api/semanas/:id', (req, res) => { ... });
+
+// Ruta catch-all para SPA (importante)
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname, '../index.html'));
 });
 
-app.listen(PORT, () => {
-    console.log("Servidor corriendo en puerto " + PORT);
+app.listen(PORT, '0.0.0.0', () => {   // ← 0.0.0.0 es clave en Railway
+  console.log(`🚀 Servidor corriendo en puerto ${PORT}`);
 });
