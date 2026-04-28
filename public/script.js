@@ -324,7 +324,7 @@ async function guardarSemana() {
   const total_hours = parseFloat(document.getElementById("total").getAttribute("data-total")) || 0;
 
   try {
-    const response = await fetch('http://localhost:3000/api/semanas', {
+    const response = await fetch('/api/semanas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ month, rows, total_hours })
@@ -415,7 +415,7 @@ function limpiarParaExportarClonada(captureElement) {
 // ==================== MODALES ====================
 async function verSemanasGuardadas() {
   try {
-    const response = await fetch('http://localhost:3000/api/semanas');
+    const response = await fetch('/api/semanas');
     const semanas = await response.json();
 
     let contenido = '';
