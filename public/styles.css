@@ -437,3 +437,75 @@ select {
 .btn-eliminar:hover {
   background: #dc2626;
 }
+
+/* ================= MOBILE APP STYLE ================= */
+@media (max-width: 768px) {
+
+  table thead {
+    display: none;
+  }
+
+  table, tbody, tr {
+    display: block;
+    width: 100%;
+  }
+
+  tr {
+    background: white;
+    margin-bottom: 15px;
+    border-radius: 12px;
+    padding: 12px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  td {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 10px;
+    border: none;
+    padding: 6px 0;
+  }
+
+  td::before {
+    font-weight: 600;
+    color: #64748b;
+    font-size: 0.8rem;
+    margin-bottom: 3px;
+  }
+
+  td:nth-child(1)::before { content: "📅 Date"; }
+  td:nth-child(2)::before { content: "📍 Location"; }
+  td:nth-child(3)::before { content: "🛠 Task"; }
+  td:nth-child(4)::before { content: "⏰ Time"; }
+  td:nth-child(5)::before { content: "⏱ Hours"; }
+
+  /* Inputs más cómodos */
+  .task-search-input,
+  select {
+    width: 100%;
+  }
+
+  /* Botón ubicación */
+  .place-box {
+    flex-direction: column;
+  }
+
+  .loc-btn {
+    width: 100%;
+  }
+}
+
+tr {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
