@@ -531,25 +531,20 @@ select {
 }
 
 #capture.export-mode {
-    width: 1200px !important;
-    min-width: 1200px !important;
-    margin: 0 auto;
-    padding: 30px;
+    width: 1250px !important;
+    min-width: 1250px !important;
+    padding: 30px !important;
     background: white;
-    box-shadow: none;
 }
 
 #capture table {
     width: 100% !important;
     table-layout: fixed;
-    border-collapse: collapse;
 }
 
-#capture th, #capture td {
-    padding: 12px 8px !important;
+#capture td, #capture th {
     word-break: break-word;
     white-space: normal;
-    vertical-align: middle;
 }
 
 /* Evita que los textos largos se corten */
@@ -557,3 +552,4 @@ select {
     max-width: none !important;
     width: 100% !important;
 }
+
