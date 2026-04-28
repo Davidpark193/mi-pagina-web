@@ -352,23 +352,39 @@ function descargar() {
     const capture = document.getElementById("capture");
 
     html2canvas(capture, {
-        scale: 3,
+        scale: 3,                    // alta resolución
         backgroundColor: "#ffffff",
         logging: false,
+        width: capture.scrollWidth,  // ← importante
+        height: capture.scrollHeight,
         onclone: (clonedDoc) => {
             const clonedCapture = clonedDoc.getElementById("capture");
             if (!clonedCapture) return;
 
             clonedCapture.classList.add("export-mode");
+
+            // === FORZAR ANCHO COMPLETO PARA EXPORTACIÓN ===
+            clonedCapture.style.width = "1200px";           // ancho fijo generoso
+            clonedCapture.style.minWidth = "1200px";
+            clonedCapture.style.maxWidth = "none";
+            clonedCapture.style.margin = "0";
+            clonedCapture.style.padding = "20px";
+            clonedCapture.style.boxSizing = "border-box";
+
+            // Tabla completa
+            const tabla = clonedCapture.querySelector("table");
+            if (tabla) {
+                tabla.style.width = "100%";
+                tabla.style.tableLayout = "fixed";
+            }
+
             limpiarParaExportarClonada(clonedCapture);
         }
     })
     .then(canvas => {
         const link = document.createElement("a");
-
-        const monthValue = document.getElementById("month").value || "Semana";
-        link.download = `Payroll_Week_${monthValue}.png`;
-
+        const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+        link.download = `Payroll_${monthValue}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
     })

@@ -522,3 +522,38 @@ select {
   }
 
 }
+
+#capture {
+    width: 100%;
+    max-width: 100%;
+    overflow: visible !important;
+    box-sizing: border-box;
+}
+
+#capture.export-mode {
+    width: 1200px !important;
+    min-width: 1200px !important;
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    box-shadow: none;
+}
+
+#capture table {
+    width: 100% !important;
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+#capture th, #capture td {
+    padding: 12px 8px !important;
+    word-break: break-word;
+    white-space: normal;
+    vertical-align: middle;
+}
+
+/* Evita que los textos largos se corten */
+#capture .place-box, #capture .editable, #capture .task-search-input {
+    max-width: none !important;
+    width: 100% !important;
+}
