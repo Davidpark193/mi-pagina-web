@@ -11,7 +11,13 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// 🔥 CONEXIÓN A RAILWAY
+// 🔥 CONEXIÓN A RAILWAY (AQUÍ ESTABA EL ERROR)
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: { rejectUnauthorized: false }
+});
+
+// 🔥 CREAR TABLAS AUTOMÁTICAMENTE
 async function crearTablas() {
   try {
     await pool.query(`
@@ -41,6 +47,7 @@ async function crearTablas() {
   }
 }
 
+// 👇 IMPORTANTE: ejecutar después de crear pool
 crearTablas();
 
 // ================= GUARDAR =================
@@ -65,7 +72,7 @@ app.post("/api/semanas", async (req, res) => {
     res.json({ success: true });
 
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERROR GUARDAR:", err);
     res.json({ success: false, message: err.message });
   }
 });
@@ -76,7 +83,7 @@ app.get("/api/semanas", async (req, res) => {
     const result = await pool.query("SELECT * FROM semanas ORDER BY id DESC");
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERROR LISTAR:", err);
     res.json([]);
   }
 });
@@ -90,7 +97,7 @@ app.get("/api/semanas/:id", async (req, res) => {
     );
     res.json(result.rows);
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERROR DETALLE:", err);
     res.json([]);
   }
 });
@@ -102,11 +109,12 @@ app.delete("/api/semanas/:id", async (req, res) => {
     await pool.query("DELETE FROM semanas WHERE id=$1", [req.params.id]);
     res.json({ success: true });
   } catch (err) {
-    console.error(err);
+    console.error("❌ ERROR ELIMINAR:", err);
     res.json({ success: false });
   }
 });
 
+// ================= START SERVER =================
 app.listen(PORT, () => {
   console.log("🚀 Servidor corriendo en puerto " + PORT);
 });
