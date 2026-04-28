@@ -361,18 +361,19 @@ function descargar() {
 
             clonedCapture.classList.add("export-mode");
 
-            // === ANCHO DINÁMICO MEJORADO ===
+            // === ANCHO QUE FUNCIONA BIEN EN MÓVIL Y PC ===
             clonedCapture.style.width = "auto";
-            clonedCapture.style.minWidth = "1100px";     // suficiente para 5 columnas
-            clonedCapture.style.maxWidth = "1300px";
+            clonedCapture.style.minWidth = "1050px";     // ← Reducido para móvil
+            clonedCapture.style.maxWidth = "1350px";
             clonedCapture.style.margin = "0 auto";
             clonedCapture.style.padding = "25px 30px";
             clonedCapture.style.boxSizing = "border-box";
+            clonedCapture.style.fontFamily = "Arial, sans-serif";
 
             const tabla = clonedCapture.querySelector("#tabla");
             if (tabla) {
                 tabla.style.width = "100%";
-                tabla.style.tableLayout = "auto";   // mejor que fixed
+                tabla.style.tableLayout = "fixed";   // Mejor para evitar desorden
             }
 
             limpiarParaExportarClonada(clonedCapture);
@@ -393,31 +394,29 @@ function limpiarParaExportarClonada(captureElement) {
     const rows = captureElement.querySelectorAll("#tabla tbody tr");
 
     rows.forEach(fila => {
-        // === PLACE / LOCATION ===
+        // PLACE / LOCATION
         const select = fila.querySelector("select");
         const direccion = fila.querySelector(".editable");
-        let textoLugar = (direccion && direccion.innerText.trim()) || 
-                        (select && select.value) || 
-                        "HOUSE 34 Seaview Montauk";
+        let textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
 
         const divLugar = document.createElement("div");
         divLugar.style.fontWeight = "600";
-        divLugar.style.fontSize = "15px";
-        divLugar.style.lineHeight = "1.3";
+        divLugar.style.fontSize = "14px";
+        divLugar.style.lineHeight = "1.4";
         divLugar.style.wordBreak = "break-word";
         divLugar.style.whiteSpace = "normal";
         divLugar.innerText = textoLugar;
         fila.cells[1].innerHTML = "";
         fila.cells[1].appendChild(divLugar);
 
-        // === TASK ===
+        // TASK
         const taskInput = fila.querySelector(".task-search-input");
         if (taskInput) {
-            const taskText = taskInput.value.trim() || "—";
+            let taskText = taskInput.value.trim() || "—";
             const divTask = document.createElement("div");
             divTask.style.fontWeight = "500";
-            divTask.style.fontSize = "15px";
-            divTask.style.lineHeight = "1.3";
+            divTask.style.fontSize = "14px";
+            divTask.style.lineHeight = "1.4";
             divTask.style.wordBreak = "break-word";
             divTask.style.whiteSpace = "normal";
             divTask.innerText = taskText;
@@ -425,28 +424,29 @@ function limpiarParaExportarClonada(captureElement) {
             fila.cells[2].appendChild(divTask);
         }
 
-        // === TIME ===
+        // TIME
         const timeCell = fila.cells[3];
         const timeText = timeCell.innerText.trim() || "—";
         const divTime = document.createElement("div");
         divTime.style.fontWeight = "500";
-        divTime.style.fontSize = "15px";
+        divTime.style.fontSize = "14.5px";
+        divTime.style.textAlign = "center";
         divTime.innerText = timeText;
         fila.cells[3].innerHTML = "";
         fila.cells[3].appendChild(divTime);
 
-        // === HOURS (mantener verde si lo tienes) ===
+        // HOURS
         const hoursCell = fila.cells[4];
         if (hoursCell) {
-            hoursCell.style.fontWeight = "600";
+            hoursCell.style.fontWeight = "700";
+            hoursCell.style.textAlign = "center";
         }
     });
 
-    // Total
     const totalEl = captureElement.querySelector("#total");
     if (totalEl) {
-        const valor = totalEl.getAttribute("data-total") || "0.0";
-        totalEl.innerText = parseFloat(valor).toFixed(1);
+        totalEl.style.fontSize = "18px";
+        totalEl.style.fontWeight = "bold";
     }
 }
 
