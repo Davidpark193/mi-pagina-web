@@ -350,56 +350,62 @@ async function descargar() {
     calcularHoras();
 
     const capture = document.getElementById("capture");
-    if (!capture) return;
+    if (!capture) {
+        alert("No se encontró el elemento #capture");
+        return;
+    }
 
-    // === FORZAR ESTILO DE ESCRITORIO ANTES DE CAPTURAR ===
-    const originalWidth = capture.offsetWidth;
-    const originalStyle = capture.style.cssText; // guardamos estilos originales
+    // Guardar estilos originales
+    const originalStyle = capture.style.cssText;
+    const originalClass = capture.className;
 
-    // Fuerza un ancho fijo de escritorio (ajusta según tu diseño)
-    capture.style.width = "1200px";           // ← Cambia este valor si necesitas más o menos
+    // Forzar ancho de escritorio
+    capture.style.width = "1200px";
     capture.style.maxWidth = "1200px";
     capture.style.margin = "0 auto";
-
-    // Añadimos clase de exportación
     capture.classList.add("export-mode");
 
     try {
+        console.log("🚀 Iniciando html2canvas...");
+
         const canvas = await html2canvas(capture, {
-            scale: 3,                    // 3 es bueno, puedes subir a 4 si quieres más calidad
+            scale: 3,
             useCORS: true,
+            allowTaint: true,           // ← Importante en servidores
             backgroundColor: "#ffffff",
-            logging: false,
-            width: 1200,                 // Forzamos el ancho exacto
-            height: capture.offsetHeight,
+            logging: true,              // Activa logs para ver qué pasa
+            width: 1200,
+            height: capture.scrollHeight || capture.offsetHeight,
             onclone: (clonedDoc) => {
                 const clonedCapture = clonedDoc.getElementById("capture");
-                if (!clonedCapture) return;
-
-                clonedCapture.classList.add("export-mode");
-                limpiarParaExportarClonada(clonedCapture);
-
-                // Muy importante: forzar el mismo ancho en el clon
-                clonedCapture.style.width = "1200px";
-                clonedCapture.style.maxWidth = "1200px";
-                clonedCapture.style.boxSizing = "border-box";
+                if (clonedCapture) {
+                    clonedCapture.classList.add("export-mode");
+                    clonedCapture.style.width = "1200px";
+                    clonedCapture.style.maxWidth = "1200px";
+                    limpiarParaExportarClonada(clonedCapture);
+                }
             }
         });
 
-        // Descargar
+        console.log("✅ Canvas generado correctamente");
+
         const link = document.createElement("a");
         const month = document.getElementById("month").value || "Semana";
         link.download = `Payroll_Week_${month}.png`;
-        link.href = canvas.toDataURL("image/png", 1.0); // calidad máxima
+        link.href = canvas.toDataURL("image/png", 1.0);
         link.click();
 
     } catch (err) {
-        console.error("Error al generar PNG:", err);
-        alert("Hubo un error al generar la imagen.");
+        console.error("❌ Error completo en html2canvas:", err);
+        console.error("Nombre del error:", err.name);
+        console.error("Mensaje:", err.message);
+        console.error("Stack:", err.stack);
+        
+        alert("Error al generar la imagen.\n\nRevisa la consola (F12) y dime qué error ves.");
     } finally {
-        // Restaurar estilos originales
+        // Restaurar
         capture.style.cssText = originalStyle;
-        capture.classList.remove("export-mode");
+        capture.className = originalClass;
     }
 }
 
