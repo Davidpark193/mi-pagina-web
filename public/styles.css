@@ -523,33 +523,52 @@ select {
 
 }
 
+/* ====================== ESTILOS PARA EXPORTACIÓN ====================== */
+
 #capture {
     width: 100%;
     max-width: 100%;
-    overflow: visible !important;
-    box-sizing: border-box;
+    margin: 0 auto;
+    background: white;
+    overflow: visible;
 }
 
 #capture.export-mode {
-    width: 1250px !important;
-    min-width: 1250px !important;
-    padding: 30px !important;
-    background: white;
+    width: auto !important;
+    min-width: 1100px !important;
+    max-width: 1350px !important;
+    margin: 0 auto !important;
+    padding: 30px 35px !important;
+    background: white !important;
+    box-shadow: none !important;
+    box-sizing: border-box;
 }
 
+/* Tabla */
 #capture table {
     width: 100% !important;
-    table-layout: fixed;
+    table-layout: auto;
+    border-collapse: collapse;
 }
 
-#capture td, #capture th {
+#capture th, #capture td {
+    padding: 12px 10px !important;
+    vertical-align: middle;
+    font-size: 15px;
     word-break: break-word;
     white-space: normal;
 }
 
-/* Evita que los textos largos se corten */
-#capture .place-box, #capture .editable, #capture .task-search-input {
+/* Evitar que el texto se corte */
+#capture .editable,
+#capture .task-search-input,
+#capture select {
     max-width: none !important;
-    width: 100% !important;
+}
+
+/* Total */
+#capture #total {
+    font-size: 18px;
+    font-weight: bold;
 }
 

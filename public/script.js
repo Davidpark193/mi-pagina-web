@@ -347,97 +347,107 @@ async function guardarSemana() {
 
 // ==================== EXPORTAR PNG ====================
 function descargar() {
-  calcularHoras();
+    calcularHoras();
 
-  const capture = document.getElementById("capture");
+    const capture = document.getElementById("capture");
 
-  html2canvas(capture, {
-    scale: 3,
-    backgroundColor: "#ffffff",
-    logging: false,
-    width: capture.scrollWidth,
-    height: capture.scrollHeight,
-    onclone: (clonedDoc) => {
-      const clonedCapture = clonedDoc.getElementById("capture");
-      if (!clonedCapture) return;
+    html2canvas(capture, {
+        scale: 3,
+        backgroundColor: "#ffffff",
+        logging: false,
+        onclone: (clonedDoc) => {
+            const clonedCapture = clonedDoc.getElementById("capture");
+            if (!clonedCapture) return;
 
-      clonedCapture.classList.add("export-mode");
+            clonedCapture.classList.add("export-mode");
 
-      // === FORZAR ANCHO FIJO PARA QUE NO SE CORTE ===
-      clonedCapture.style.width = "1250px";
-      clonedCapture.style.minWidth = "1250px";
-      clonedCapture.style.maxWidth = "none";
-      clonedCapture.style.margin = "0";
-      clonedCapture.style.padding = "30px";
-      clonedCapture.style.boxSizing = "border-box";
+            // === ANCHO DINÁMICO MEJORADO ===
+            clonedCapture.style.width = "auto";
+            clonedCapture.style.minWidth = "1100px";     // suficiente para 5 columnas
+            clonedCapture.style.maxWidth = "1300px";
+            clonedCapture.style.margin = "0 auto";
+            clonedCapture.style.padding = "25px 30px";
+            clonedCapture.style.boxSizing = "border-box";
 
-      const tabla = clonedCapture.querySelector("table");
-      if (tabla) {
-        tabla.style.width = "100%";
-        tabla.style.tableLayout = "fixed";
-      }
+            const tabla = clonedCapture.querySelector("#tabla");
+            if (tabla) {
+                tabla.style.width = "100%";
+                tabla.style.tableLayout = "auto";   // mejor que fixed
+            }
 
-      limpiarParaExportarClonada(clonedCapture);
-    }
-  })
-  .then(canvas => {
-    const link = document.createElement("a");
-    const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
-    link.download = `Payroll_${monthValue}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  })
-  .catch(err => {
-    console.error("Error al generar PNG:", err);
-    alert("Hubo un error al generar la imagen.");
-  });
+            limpiarParaExportarClonada(clonedCapture);
+        }
+    })
+    .then(canvas => {
+        const link = document.createElement("a");
+        const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+        link.download = `Payroll_${monthValue}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    })
+    .catch(err => console.error(err));
 }
 
 
 function limpiarParaExportarClonada(captureElement) {
-  const rows = captureElement.querySelectorAll("#tabla tbody tr");
+    const rows = captureElement.querySelectorAll("#tabla tbody tr");
 
-  rows.forEach(fila => {
-    // Lugar
-    const select = fila.querySelector("select");
-    const direccion = fila.querySelector(".editable");
-    const textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
+    rows.forEach(fila => {
+        // === PLACE / LOCATION ===
+        const select = fila.querySelector("select");
+        const direccion = fila.querySelector(".editable");
+        let textoLugar = (direccion && direccion.innerText.trim()) || 
+                        (select && select.value) || 
+                        "HOUSE 34 Seaview Montauk";
 
-    const nuevoDivLugar = document.createElement("div");
-    nuevoDivLugar.style.fontWeight = "500";
-    nuevoDivLugar.style.wordBreak = "break-word";
-    nuevoDivLugar.innerText = textoLugar;
-    fila.cells[1].innerHTML = "";
-    fila.cells[1].appendChild(nuevoDivLugar);
+        const divLugar = document.createElement("div");
+        divLugar.style.fontWeight = "600";
+        divLugar.style.fontSize = "15px";
+        divLugar.style.lineHeight = "1.3";
+        divLugar.style.wordBreak = "break-word";
+        divLugar.style.whiteSpace = "normal";
+        divLugar.innerText = textoLugar;
+        fila.cells[1].innerHTML = "";
+        fila.cells[1].appendChild(divLugar);
 
-    // Task
-    const taskInput = fila.querySelector(".task-search-input");
-    if (taskInput) {
-      const taskText = taskInput.value.trim() || "—";
-      const taskDiv = document.createElement("div");
-      taskDiv.style.fontWeight = "500";
-      taskDiv.style.wordBreak = "break-word";
-      taskDiv.innerText = taskText;
-      fila.cells[2].innerHTML = "";
-      fila.cells[2].appendChild(taskDiv);
+        // === TASK ===
+        const taskInput = fila.querySelector(".task-search-input");
+        if (taskInput) {
+            const taskText = taskInput.value.trim() || "—";
+            const divTask = document.createElement("div");
+            divTask.style.fontWeight = "500";
+            divTask.style.fontSize = "15px";
+            divTask.style.lineHeight = "1.3";
+            divTask.style.wordBreak = "break-word";
+            divTask.style.whiteSpace = "normal";
+            divTask.innerText = taskText;
+            fila.cells[2].innerHTML = "";
+            fila.cells[2].appendChild(divTask);
+        }
+
+        // === TIME ===
+        const timeCell = fila.cells[3];
+        const timeText = timeCell.innerText.trim() || "—";
+        const divTime = document.createElement("div");
+        divTime.style.fontWeight = "500";
+        divTime.style.fontSize = "15px";
+        divTime.innerText = timeText;
+        fila.cells[3].innerHTML = "";
+        fila.cells[3].appendChild(divTime);
+
+        // === HOURS (mantener verde si lo tienes) ===
+        const hoursCell = fila.cells[4];
+        if (hoursCell) {
+            hoursCell.style.fontWeight = "600";
+        }
+    });
+
+    // Total
+    const totalEl = captureElement.querySelector("#total");
+    if (totalEl) {
+        const valor = totalEl.getAttribute("data-total") || "0.0";
+        totalEl.innerText = parseFloat(valor).toFixed(1);
     }
-
-    // Time
-    const timeCell = fila.cells[3];
-    const timeText = timeCell.innerText.trim() || "—";
-    const timeDiv = document.createElement("div");
-    timeDiv.style.fontWeight = "500";
-    timeDiv.innerText = timeText;
-    fila.cells[3].innerHTML = "";
-    fila.cells[3].appendChild(timeDiv);
-  });
-
-  // Total
-  const totalEl = captureElement.querySelector("#total");
-  if (totalEl) {
-    const totalValor = totalEl.getAttribute("data-total") || "0.0";
-    totalEl.innerText = parseFloat(totalValor).toFixed(1);
-  }
 }
 
 // ==================== MODALES ====================
