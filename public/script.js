@@ -347,107 +347,97 @@ async function guardarSemana() {
 
 // ==================== EXPORTAR PNG ====================
 function descargar() {
-    calcularHoras();
+  calcularHoras();
 
-    const capture = document.getElementById("capture");
+  const capture = document.getElementById("capture");
 
-    html2canvas(capture, {
-        scale: 3,                    // alta resolución
-        backgroundColor: "#ffffff",
-        logging: false,
-        width: capture.scrollWidth,  // ← importante
-        height: capture.scrollHeight,
-        onclone: (clonedDoc) => {
-            const clonedCapture = clonedDoc.getElementById("capture");
-            if (!clonedCapture) return;
+  html2canvas(capture, {
+    scale: 3,
+    backgroundColor: "#ffffff",
+    logging: false,
+    width: capture.scrollWidth,
+    height: capture.scrollHeight,
+    onclone: (clonedDoc) => {
+      const clonedCapture = clonedDoc.getElementById("capture");
+      if (!clonedCapture) return;
 
-            clonedCapture.classList.add("export-mode");
+      clonedCapture.classList.add("export-mode");
 
-            // === FORZAR ANCHO COMPLETO PARA EXPORTACIÓN ===
-            clonedCapture.style.width = "1200px";           // ancho fijo generoso
-            clonedCapture.style.minWidth = "1200px";
-            clonedCapture.style.maxWidth = "none";
-            clonedCapture.style.margin = "0";
-            clonedCapture.style.padding = "20px";
-            clonedCapture.style.boxSizing = "border-box";
+      // === FORZAR ANCHO FIJO PARA QUE NO SE CORTE ===
+      clonedCapture.style.width = "1250px";
+      clonedCapture.style.minWidth = "1250px";
+      clonedCapture.style.maxWidth = "none";
+      clonedCapture.style.margin = "0";
+      clonedCapture.style.padding = "30px";
+      clonedCapture.style.boxSizing = "border-box";
 
-            // Tabla completa
-            const tabla = clonedCapture.querySelector("table");
-            if (tabla) {
-                tabla.style.width = "100%";
-                tabla.style.tableLayout = "fixed";
-            }
+      const tabla = clonedCapture.querySelector("table");
+      if (tabla) {
+        tabla.style.width = "100%";
+        tabla.style.tableLayout = "fixed";
+      }
 
-            limpiarParaExportarClonada(clonedCapture);
-        }
-    })
-    .then(canvas => {
-        const link = document.createElement("a");
-        const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
-        link.download = `Payroll_${monthValue}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-    })
-    .catch(err => {
-        console.error("Error al generar PNG:", err);
-        alert("Hubo un error al generar la imagen.");
-    });
+      limpiarParaExportarClonada(clonedCapture);
+    }
+  })
+  .then(canvas => {
+    const link = document.createElement("a");
+    const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+    link.download = `Payroll_${monthValue}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  })
+  .catch(err => {
+    console.error("Error al generar PNG:", err);
+    alert("Hubo un error al generar la imagen.");
+  });
 }
 
 
 function limpiarParaExportarClonada(captureElement) {
-    const rows = captureElement.querySelectorAll("#tabla tbody tr");
+  const rows = captureElement.querySelectorAll("#tabla tbody tr");
 
-    rows.forEach(fila => {
-        // Lugar / Dirección
-        const select = fila.querySelector("select");
-        const direccion = fila.querySelector(".editable");
+  rows.forEach(fila => {
+    // Lugar
+    const select = fila.querySelector("select");
+    const direccion = fila.querySelector(".editable");
+    const textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
 
-        const textoLugar =
-            (direccion && direccion.innerText.trim()) ||
-            (select && select.value) ||
-            "HOUSE 34 Seaview Montauk";
+    const nuevoDivLugar = document.createElement("div");
+    nuevoDivLugar.style.fontWeight = "500";
+    nuevoDivLugar.style.wordBreak = "break-word";
+    nuevoDivLugar.innerText = textoLugar;
+    fila.cells[1].innerHTML = "";
+    fila.cells[1].appendChild(nuevoDivLugar);
 
-        const nuevoDivLugar = document.createElement("div");
-        nuevoDivLugar.style.fontWeight = "500";
-        nuevoDivLugar.innerText = textoLugar;
-
-        fila.cells[1].innerHTML = "";
-        fila.cells[1].appendChild(nuevoDivLugar);
-
-        // Task
-        const taskInput = fila.querySelector(".task-search-input");
-
-        if (taskInput) {
-            const taskText = taskInput.value.trim() || "—";
-
-            const taskDiv = document.createElement("div");
-            taskDiv.style.fontWeight = "500";
-            taskDiv.innerText = taskText;
-
-            fila.cells[2].innerHTML = "";
-            fila.cells[2].appendChild(taskDiv);
-        }
-
-        // Time
-        const timeCell = fila.cells[3];
-        const timeText = timeCell.innerText.trim() || "—";
-
-        const timeDiv = document.createElement("div");
-        timeDiv.style.fontWeight = "500";
-        timeDiv.innerText = timeText;
-
-        fila.cells[3].innerHTML = "";
-        fila.cells[3].appendChild(timeDiv);
-    });
-
-    // Total
-    const totalEl = captureElement.querySelector("#total");
-
-    if (totalEl) {
-        const totalValor = totalEl.getAttribute("data-total") || "0.0";
-        totalEl.innerText = parseFloat(totalValor).toFixed(1);
+    // Task
+    const taskInput = fila.querySelector(".task-search-input");
+    if (taskInput) {
+      const taskText = taskInput.value.trim() || "—";
+      const taskDiv = document.createElement("div");
+      taskDiv.style.fontWeight = "500";
+      taskDiv.style.wordBreak = "break-word";
+      taskDiv.innerText = taskText;
+      fila.cells[2].innerHTML = "";
+      fila.cells[2].appendChild(taskDiv);
     }
+
+    // Time
+    const timeCell = fila.cells[3];
+    const timeText = timeCell.innerText.trim() || "—";
+    const timeDiv = document.createElement("div");
+    timeDiv.style.fontWeight = "500";
+    timeDiv.innerText = timeText;
+    fila.cells[3].innerHTML = "";
+    fila.cells[3].appendChild(timeDiv);
+  });
+
+  // Total
+  const totalEl = captureElement.querySelector("#total");
+  if (totalEl) {
+    const totalValor = totalEl.getAttribute("data-total") || "0.0";
+    totalEl.innerText = parseFloat(totalValor).toFixed(1);
+  }
 }
 
 // ==================== MODALES ====================
