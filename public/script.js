@@ -466,7 +466,7 @@ async function verSemanasGuardadas() {
 async function eliminarSemana(id) {
   if (!confirm("¿Estás seguro de que quieres eliminar esta semana?\nEsta acción no se puede deshacer.")) return;
   try {
-    await fetch(`http://localhost:3000/api/semanas/${id}`, { method: 'DELETE' });
+    await fetch(`/api/semanas/${id}`, { method: 'DELETE' });
     alert("✅ Semana eliminada correctamente");
     verSemanasGuardadas();
   } catch (error) {
@@ -476,7 +476,7 @@ async function eliminarSemana(id) {
 
 async function verDetallesSemana(id) {
   try {
-    const response = await fetch(`http://localhost:3000/api/semanas/${id}`);
+    const response = await fetch(`/api/semanas/${id}`);
     const rows = await response.json();
 
     let filasHTML = '';
