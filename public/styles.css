@@ -524,13 +524,49 @@ select {
 }
 
 .export-mode {
-    width: 1200px !important;
-    max-width: 1200px !important;
-    margin: 0 auto !important;
-    box-sizing: border-box;
+  width: 1200px !important;
+  max-width: 1200px !important;
+  margin: 0 auto !important;
+  padding: 30px !important;
+  box-sizing: border-box;
+  background: white;
 }
 
-/* Evita que se rompa el layout en el clon */
-.export-mode * {
-    box-sizing: border-box;
+.export-mode .container {
+  padding: 0 !important;
+  margin: 0 !important;
+  max-width: none;
+}
+
+.export-mode table {
+  width: 100% !important;
+  table-layout: fixed;
+}
+
+.export-mode th,
+.export-mode td {
+  padding: 16px 12px !important;
+  font-size: 15px !important;
+  white-space: normal !important;
+}
+
+.export-mode .date-cell {
+  min-width: 240px;
+  font-size: 15px;
+}
+
+/* Asegurar que los inputs se oculten bien */
+.export-mode select,
+.export-mode .loc-btn,
+.export-mode .task-search-input {
+  display: none !important;
+}
+
+/* Mejorar total en exportación */
+.export-mode .total-row {
+  padding: 25px 0 !important;
+}
+
+.export-mode .total-value {
+  font-size: 2.1rem !important;
 }

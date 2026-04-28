@@ -351,69 +351,60 @@ function descargar() {
 
   const capture = document.getElementById("capture");
 
+  // Forzar modo escritorio durante la captura
+  capture.classList.add("export-mode");
+
   html2canvas(capture, {
-    scale: 3, // 🔥 siempre alta calidad (sirve para ambos)
+    scale: 3,                    // Alta calidad (2 en móviles si quieres más velocidad)
     backgroundColor: "#ffffff",
     logging: false,
+    width: 1200,                 // Ancho fijo (importante para consistencia)
+    height: capture.scrollHeight,
     useCORS: true,
-    scrollX: 0,
-    scrollY: -window.scrollY,
-
+    allowTaint: true,
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
       if (!clonedCapture) return;
 
-      // 🔥 FORZAR DISEÑO COMO PC (clave)
-      clonedCapture.style.width = "1100px";
-      clonedCapture.style.maxWidth = "1100px";
-      clonedCapture.style.margin = "0 auto";
-      clonedCapture.style.padding = "20px";
-
-      // 🔥 quitar cualquier estilo responsive
-      clonedCapture.style.transform = "none";
-      clonedCapture.style.zoom = "1";
-
-      // 🔥 tabla perfecta
-      const table = clonedCapture.querySelector("table");
-      if (table) {
-        table.style.width = "100%";
-        table.style.tableLayout = "fixed";
-        table.style.borderCollapse = "collapse";
-        table.style.fontSize = "14px";
-      }
-
-      // 🔥 eliminar botones/iconos
-      clonedCapture.querySelectorAll("button").forEach(btn => btn.remove());
-
-      // 🔥 inputs → texto limpio
-      clonedCapture.querySelectorAll("input").forEach(input => {
-        const div = document.createElement("div");
-        div.innerText = input.value || "—";
-        div.style.fontWeight = "500";
-        input.replaceWith(div);
-      });
-
-      // 🔥 selects → texto
-      clonedCapture.querySelectorAll("select").forEach(select => {
-        const div = document.createElement("div");
-        div.innerText = select.value;
-        div.style.fontWeight = "500";
-        select.replaceWith(div);
-      });
-
-      // 🔥 tu función
+      clonedCapture.classList.add("export-mode");
       limpiarParaExportarClonada(clonedCapture);
+
+      // === FORZAR ESTILO DE ESCRITORIO EN MÓVIL ===
+      clonedCapture.style.width = "1200px";
+      clonedCapture.style.maxWidth = "1200px";
+      clonedCapture.style.margin = "0 auto";
+      clonedCapture.style.boxShadow = "none";
+
+      // Desactivar todas las media queries móviles
+      const style = clonedDoc.createElement('style');
+      style.innerHTML = `
+        @media (max-width: 768px) {
+          table, thead, tbody, tr, th, td {
+            display: table !important;
+            width: 100% !important;
+            overflow-x: visible !important;
+            white-space: normal !important;
+          }
+          .task-search-input, select, .loc-btn {
+            display: none !important;
+          }
+        }
+      `;
+      clonedDoc.head.appendChild(style);
     }
-  })
-  .then(canvas => {
+  }).then(canvas => {
     const link = document.createElement("a");
-    link.download = `Payroll_Week_${document.getElementById("month").value || "Semana"}.png`;
-    link.href = canvas.toDataURL("image/png");
+    const fecha = document.getElementById("month").value.replace(/ /g, "_") || "Semana";
+    link.download = `Payroll_Week_${fecha}.png`;
+    link.href = canvas.toDataURL("image/png", 1.0);
     link.click();
-  })
-  .catch(err => {
-    console.error("Error real:", err);
-    alert("❌ Error al generar la imagen");
+
+    // Quitar clase después de capturar
+    capture.classList.remove("export-mode");
+  }).catch(err => {
+    console.error("Error html2canvas:", err);
+    alert("Error al generar la imagen. Inténtalo de nuevo.");
+    capture.classList.remove("export-mode");
   });
 }
 
