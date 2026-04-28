@@ -12,12 +12,6 @@ app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
 // 🔥 CONEXIÓN A RAILWAY
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: { rejectUnauthorized: false }
-});
-
-// 🔥 CREAR TABLAS AUTOMÁTICAMENTE
 async function crearTablas() {
   try {
     await pool.query(`
@@ -41,7 +35,7 @@ async function crearTablas() {
       );
     `);
 
-    console.log("✅ Tablas listas");
+    console.log("✅ Tablas creadas");
   } catch (error) {
     console.error("❌ Error creando tablas:", error);
   }
