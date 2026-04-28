@@ -11,11 +11,43 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static(path.join(__dirname, "public")));
 
-// 🔥 CONEXIÓN CORRECTA A RAILWAY
+// 🔥 CONEXIÓN A RAILWAY
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: { rejectUnauthorized: false }
 });
+
+// 🔥 CREAR TABLAS AUTOMÁTICAMENTE
+async function crearTablas() {
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS semanas (
+        id SERIAL PRIMARY KEY,
+        month TEXT,
+        total_hours FLOAT,
+        date_saved TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS detalles (
+        id SERIAL PRIMARY KEY,
+        semana_id INTEGER REFERENCES semanas(id) ON DELETE CASCADE,
+        date TEXT,
+        place TEXT,
+        task TEXT,
+        time TEXT,
+        hours FLOAT
+      );
+    `);
+
+    console.log("✅ Tablas listas");
+  } catch (error) {
+    console.error("❌ Error creando tablas:", error);
+  }
+}
+
+crearTablas();
 
 // ================= GUARDAR =================
 app.post("/api/semanas", async (req, res) => {
@@ -40,32 +72,47 @@ app.post("/api/semanas", async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.json({ success: false });
+    res.json({ success: false, message: err.message });
   }
 });
 
 // ================= LISTAR =================
 app.get("/api/semanas", async (req, res) => {
-  const result = await pool.query("SELECT * FROM semanas ORDER BY id DESC");
-  res.json(result.rows);
+  try {
+    const result = await pool.query("SELECT * FROM semanas ORDER BY id DESC");
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.json([]);
+  }
 });
 
 // ================= DETALLE =================
 app.get("/api/semanas/:id", async (req, res) => {
-  const result = await pool.query(
-    "SELECT * FROM detalles WHERE semana_id=$1",
-    [req.params.id]
-  );
-  res.json(result.rows);
+  try {
+    const result = await pool.query(
+      "SELECT * FROM detalles WHERE semana_id=$1",
+      [req.params.id]
+    );
+    res.json(result.rows);
+  } catch (err) {
+    console.error(err);
+    res.json([]);
+  }
 });
 
 // ================= ELIMINAR =================
 app.delete("/api/semanas/:id", async (req, res) => {
-  await pool.query("DELETE FROM detalles WHERE semana_id=$1", [req.params.id]);
-  await pool.query("DELETE FROM semanas WHERE id=$1", [req.params.id]);
-  res.json({ success: true });
+  try {
+    await pool.query("DELETE FROM detalles WHERE semana_id=$1", [req.params.id]);
+    await pool.query("DELETE FROM semanas WHERE id=$1", [req.params.id]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false });
+  }
 });
 
 app.listen(PORT, () => {
-  console.log("Servidor corriendo en puerto " + PORT);
+  console.log("🚀 Servidor corriendo en puerto " + PORT);
 });
