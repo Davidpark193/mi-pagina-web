@@ -346,54 +346,61 @@ async function guardarSemana() {
 }
 
 // ==================== EXPORTAR PNG ====================
-function descargar() {
-  calcularHoras();
+async function descargar() {
+    calcularHoras();
 
-  const capture = document.getElementById("capture");
+    const capture = document.getElementById("capture");
+    if (!capture) return;
 
-  html2canvas(capture, {
-    scale: window.innerWidth < 768 ? 2 : 3, // 🔥 clave para móvil
-    backgroundColor: "#ffffff",
-    logging: false,
-    useCORS: true,
+    // === FORZAR ESTILO DE ESCRITORIO ANTES DE CAPTURAR ===
+    const originalWidth = capture.offsetWidth;
+    const originalStyle = capture.style.cssText; // guardamos estilos originales
 
-    onclone: (clonedDoc) => {
-      const clonedCapture = clonedDoc.getElementById("capture");
-      if (!clonedCapture) return;
+    // Fuerza un ancho fijo de escritorio (ajusta según tu diseño)
+    capture.style.width = "1200px";           // ← Cambia este valor si necesitas más o menos
+    capture.style.maxWidth = "1200px";
+    capture.style.margin = "0 auto";
 
-      // 🔥 FORZAR DISEÑO COMO PC (sin romper)
-      clonedCapture.style.width = "1000px";
-      clonedCapture.style.maxWidth = "1000px";
-      clonedCapture.style.margin = "0 auto";
+    // Añadimos clase de exportación
+    capture.classList.add("export-mode");
 
-      // ❌ quitamos cosas peligrosas
-      clonedCapture.style.transform = "none";
+    try {
+        const canvas = await html2canvas(capture, {
+            scale: 3,                    // 3 es bueno, puedes subir a 4 si quieres más calidad
+            useCORS: true,
+            backgroundColor: "#ffffff",
+            logging: false,
+            width: 1200,                 // Forzamos el ancho exacto
+            height: capture.offsetHeight,
+            onclone: (clonedDoc) => {
+                const clonedCapture = clonedDoc.getElementById("capture");
+                if (!clonedCapture) return;
 
-      // 🔥 tabla bien distribuida
-      const table = clonedCapture.querySelector("table");
-      if (table) {
-        table.style.width = "100%";
-        table.style.tableLayout = "fixed";
-        table.style.fontSize = "14px";
-      }
+                clonedCapture.classList.add("export-mode");
+                limpiarParaExportarClonada(clonedCapture);
 
-      // 🔥 eliminar botones (mejor que display:none)
-      clonedCapture.querySelectorAll("button").forEach(btn => btn.remove());
+                // Muy importante: forzar el mismo ancho en el clon
+                clonedCapture.style.width = "1200px";
+                clonedCapture.style.maxWidth = "1200px";
+                clonedCapture.style.boxSizing = "border-box";
+            }
+        });
 
-      // 🔥 tu función (la dejamos igual)
-      limpiarParaExportarClonada(clonedCapture);
+        // Descargar
+        const link = document.createElement("a");
+        const month = document.getElementById("month").value || "Semana";
+        link.download = `Payroll_Week_${month}.png`;
+        link.href = canvas.toDataURL("image/png", 1.0); // calidad máxima
+        link.click();
+
+    } catch (err) {
+        console.error("Error al generar PNG:", err);
+        alert("Hubo un error al generar la imagen.");
+    } finally {
+        // Restaurar estilos originales
+        capture.style.cssText = originalStyle;
+        capture.classList.remove("export-mode");
     }
-  })
-  .then(canvas => {
-    const link = document.createElement("a");
-    link.download = `Payroll_Week_${document.getElementById("month").value || "Semana"}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  })
-  .catch(err => {
-    console.error("Error real:", err);
-    alert("❌ Error al generar la imagen en móvil");
-  });
 }
 
 // ==================== MODALES ====================

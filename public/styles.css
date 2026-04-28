@@ -523,21 +523,14 @@ select {
 
 }
 
-/* 👇 MODO EXPORTAR (SIEMPRE COMO PC) */
 .export-mode {
-  width: 1200px !important;
-  max-width: 1200px !important;
+    width: 1200px !important;
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    box-sizing: border-box;
 }
 
-.export-mode table {
-  width: 100% !important;
-  font-size: 14px !important;
-}
-
-.export-mode .header {
-  flex-direction: row !important;
-}
-
-.export-mode button {
-  display: none !important;
+/* Evita que se rompa el layout en el clon */
+.export-mode * {
+    box-sizing: border-box;
 }
