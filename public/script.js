@@ -352,15 +352,40 @@ function descargar() {
   const capture = document.getElementById("capture");
 
   html2canvas(capture, {
-    scale: 3,
+    scale: window.innerWidth < 768 ? 4 : 3, // 📱 más calidad en móvil
     backgroundColor: "#ffffff",
     logging: false,
+
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
       if (!clonedCapture) return;
-      clonedCapture.classList.add("export-mode");
+
+      // 🔥 FORZAR VISTA TIPO PC
+      clonedCapture.style.width = "1200px";
+      clonedCapture.style.maxWidth = "1200px";
+      clonedCapture.style.margin = "0 auto";
+      clonedCapture.style.padding = "20px";
+
+      // 🔥 evitar que se vea comprimido
+      clonedCapture.style.transform = "scale(1)";
+      clonedCapture.style.transformOrigin = "top left";
+
+      // 🔥 tabla bien distribuida
+      const table = clonedCapture.querySelector("table");
+      if (table) {
+        table.style.width = "100%";
+        table.style.tableLayout = "fixed";
+      }
+
+      // 🔥 ocultar botones en exportación
+      clonedCapture.querySelectorAll("button").forEach(btn => {
+        btn.style.display = "none";
+      });
+
+      // 🔥 limpiar inputs (tu función)
       limpiarParaExportarClonada(clonedCapture);
     }
+
   }).then(canvas => {
     const link = document.createElement("a");
     link.download = `Payroll_Week_${document.getElementById("month").value || "Semana"}.png`;
@@ -370,46 +395,6 @@ function descargar() {
     console.error("Error al generar PNG:", err);
     alert("Hubo un error al generar la imagen.");
   });
-}
-
-function limpiarParaExportarClonada(captureElement) {
-  const rows = captureElement.querySelectorAll("#tabla tbody tr");
-
-  rows.forEach(fila => {
-    const select = fila.querySelector("select");
-    const direccion = fila.querySelector(".editable");
-    const textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
-
-    const nuevoDivLugar = document.createElement("div");
-    nuevoDivLugar.style.fontWeight = "500";
-    nuevoDivLugar.innerText = textoLugar;
-    fila.cells[1].innerHTML = "";
-    fila.cells[1].appendChild(nuevoDivLugar);
-
-    const taskInput = fila.querySelector('.task-search-input');
-    if (taskInput) {
-      const taskText = taskInput.value.trim() || "—";
-      const taskDiv = document.createElement("div");
-      taskDiv.style.fontWeight = "500";
-      taskDiv.innerText = taskText;
-      fila.cells[2].innerHTML = "";
-      fila.cells[2].appendChild(taskDiv);
-    }
-
-    const timeCell = fila.cells[3];
-    const timeText = timeCell.innerText.trim() || "—";
-    const timeDiv = document.createElement("div");
-    timeDiv.style.fontWeight = "500";
-    timeDiv.innerText = timeText;
-    fila.cells[3].innerHTML = "";
-    fila.cells[3].appendChild(timeDiv);
-  });
-
-  const totalEl = captureElement.querySelector("#total");
-  if (totalEl) {
-    const totalValor = totalEl.getAttribute("data-total") || "0.0";
-    totalEl.innerText = parseFloat(totalValor).toFixed(1);
-  }
 }
 
 // ==================== MODALES ====================
