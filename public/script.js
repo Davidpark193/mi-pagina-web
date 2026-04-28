@@ -531,11 +531,11 @@ async function verDetallesSemana(id) {
     rows.forEach(row => {
       filasHTML += `
         <tr>
-          <td>${row.date}</td>
+          <td>${row.date || ''}</td>
           <td>${row.place || '—'}</td>
           <td>${row.task || '—'}</td>
-          <td>${row.time || '—'}</td>
-          <td style="text-align:center; font-weight:600;">${row.hours}</td>
+          <td style="text-align:center;">${row.time || '—'}</td>
+          <td style="text-align:center; font-weight:600; color:#10b981;">${row.hours || '0.0'}</td>
         </tr>`;
     });
 
@@ -567,6 +567,7 @@ async function verDetallesSemana(id) {
       </div>
     `;
 
+    // Remover modal anterior si existe
     if (document.getElementById('modal-detalle')) document.getElementById('modal-detalle').remove();
     document.body.insertAdjacentHTML('beforeend', detalleHTML);
 
