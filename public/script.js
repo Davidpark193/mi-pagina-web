@@ -1,4 +1,4 @@
-// ====================== script.js - TU CÓDIGO ORIGINAL + DISEÑO MODERNO ======================
+// ====================== script.js - TU CÓDIGO ORIGINAL COMPLETO ======================
 
 const meses = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
@@ -126,9 +126,7 @@ function activarAutoGuardado() {
 
 // ==================== FUNCIONES ORIGINALES ====================
 function fechaUSA(fecha) {
-  return fecha.toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
-  });
+  return fecha.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
 }
 
 function actualizarMes(lunes) {
@@ -140,7 +138,7 @@ function actualizarMes(lunes) {
   document.getElementById("month").value = resultado;
 }
 
-// ==================== GENERAR SEMANA ====================
+// ==================== GENERAR SEMANA (adaptada al nuevo diseño) ====================
 function generarSemana() {
   const body = document.getElementById("body");
   body.innerHTML = "";
@@ -208,7 +206,7 @@ function generarSemana() {
   }
 }
 
-// ==================== TODAS LAS DEMÁS FUNCIONES ORIGINALES (SIN CAMBIOS) ====================
+// ==================== EL RESTO DE TU CÓDIGO ORIGINAL (SIN CAMBIOS) ====================
 function resetearSemanaActual() {
   if (!confirm("¿Reiniciar la semana actual? Se borrará el avance guardado localmente.")) return;
   semanaBase = new Date();
@@ -217,8 +215,11 @@ function resetearSemanaActual() {
   alert("✅ Semana reiniciada a la actual");
 }
 
-function obtenerDireccion(btn) { /* tu código original completo */ 
-  if (!navigator.geolocation) { alert("Geolocation not supported"); return; }
+function obtenerDireccion(btn) {
+  if (!navigator.geolocation) {
+    alert("Geolocation not supported");
+    return;
+  }
   btn.innerHTML = "⏳";
   navigator.geolocation.getCurrentPosition(async (pos) => {
     try {
@@ -226,7 +227,11 @@ function obtenerDireccion(btn) { /* tu código original completo */
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18`);
       const data = await res.json();
       const addr = data.address || {};
-      const direccionBonita = [addr.road || addr.residential || "", addr.city || addr.town || addr.village || "", addr.country || ""].filter(Boolean).join(", ");
+      const direccionBonita = [
+        addr.road || addr.residential || "",
+        addr.city || addr.town || addr.village || "",
+        addr.country || ""
+      ].filter(Boolean).join(", ");
       btn.parentElement.parentElement.querySelector(".editable").innerText = direccionBonita || "Location captured";
       guardarLocal();
     } catch (e) {
@@ -234,16 +239,20 @@ function obtenerDireccion(btn) { /* tu código original completo */
       guardarLocal();
     }
     btn.innerHTML = "📍";
-  }, () => { alert("Location access denied"); btn.innerHTML = "📍"; });
+  }, () => {
+    alert("Location access denied");
+    btn.innerHTML = "📍";
+  });
 }
 
-// Buscador de tareas (completo original)
 function cerrarTodosLosDropdowns() {
-  document.querySelectorAll('.task-options').forEach(opt => { opt.style.display = 'none'; });
+  document.querySelectorAll('.task-options').forEach(opt => {
+    opt.style.display = 'none';
+  });
   dropdownAbierto = null;
 }
 
-function mostrarOpciones(input) { /* tu código original */ 
+function mostrarOpciones(input) {
   const container = input.parentElement;
   const optionsDiv = container.querySelector('.task-options');
   cerrarTodosLosDropdowns();
@@ -259,7 +268,7 @@ function mostrarOpciones(input) { /* tu código original */
   });
 }
 
-function filtrarOpciones(input) { /* tu código original */ 
+function filtrarOpciones(input) {
   const container = input.parentElement;
   const optionsDiv = container.querySelector('.task-options');
   const filtro = input.value.toLowerCase().trim();
@@ -283,7 +292,7 @@ function filtrarOpciones(input) { /* tu código original */
   optionsDiv.style.display = 'block';
 }
 
-function seleccionarTarea(input, texto) { /* tu código original */ 
+function seleccionarTarea(input, texto) {
   input.value = texto;
   const optionsDiv = input.parentElement.querySelector('.task-options');
   optionsDiv.style.display = 'none';
@@ -299,7 +308,7 @@ function seleccionarTarea(input, texto) { /* tu código original */
   setTimeout(() => timeCell.focus(), 50);
 }
 
-function limpiarHorasAlEscribir(input) { /* tu código original */ 
+function limpiarHorasAlEscribir(input) {
   const row = input.closest('tr');
   const horasCell = row.querySelector(".horas");
   if (horasCell && horasCell.dataset.manual !== "true") {
@@ -313,7 +322,7 @@ function marcarManual(td) {
   guardarLocal();
 }
 
-function calcularHoras(guardar = true) { /* tu código original completo */ 
+function calcularHoras(guardar = true) {
   let total = 0;
   document.querySelectorAll("#body tr").forEach(fila => {
     const horasCell = fila.querySelector(".horas");
@@ -350,7 +359,7 @@ function calcularHoras(guardar = true) { /* tu código original completo */
   if (guardar) guardarLocal();
 }
 
-function convertir(hora) { /* tu código original */ 
+function convertir(hora) {
   const m = hora.match(/(\d+):?(\d+)?\s*(am|pm)?/i);
   if (!m) return null;
   let h = parseInt(m[1]);
@@ -361,8 +370,7 @@ function convertir(hora) { /* tu código original */
   return h * 60 + min;
 }
 
-// ==================== GUARDAR SEMANA (ORIGINAL) ====================
-async function guardarSemana() { /* tu código original completo */ 
+async function guardarSemana() {
   if (!confirm("¿Guardar esta semana y pasar a la siguiente?")) return;
   const month = document.getElementById("month").value;
   const rows = [];
@@ -400,8 +408,8 @@ async function guardarSemana() { /* tu código original completo */
   }
 }
 
-// ==================== EXPORTAR PNG (ORIGINAL) ====================
-function descargar() { /* tu código original completo */ 
+// ==================== EXPORTAR PNG (TU ORIGINAL) ====================
+function descargar() {
   calcularHoras();
   const capture = document.getElementById("capture");
   html2canvas(capture, {
@@ -448,7 +456,7 @@ function descargar() { /* tu código original completo */
     });
 }
 
-function limpiarParaExportarClonada(captureElement) { /* tu código original */ 
+function limpiarParaExportarClonada(captureElement) {
   const rows = captureElement.querySelectorAll("#tabla tbody tr");
   rows.forEach(fila => {
     const select = fila.querySelector("select");
@@ -501,7 +509,7 @@ function limpiarParaExportarClonada(captureElement) { /* tu código original */
   }
 }
 
-// ==================== MODALES - EXACTAMENTE COMO ANTES ====================
+// ==================== MODALES - EXACTAMENTE COMO TU CÓDIGO ORIGINAL ====================
 async function verSemanasGuardadas() {
   try {
     const response = await fetch('/api/semanas');
@@ -552,7 +560,7 @@ async function verSemanasGuardadas() {
   }
 }
 
-// Todas las funciones de modales (exactas como tenías)
+// (Todas las funciones de modales que tenías)
 async function eliminarSemana(id) {
   if (!confirm("¿Estás seguro de que quieres eliminar esta semana?\nEsta acción no se puede deshacer.")) return;
   try {
@@ -564,7 +572,7 @@ async function eliminarSemana(id) {
   }
 }
 
-async function verDetallesSemana(id) { /* tu código original completo */ 
+async function verDetallesSemana(id) {
   try {
     const response = await fetch(`/api/semanas/${id}`);
     const data = await response.json();
@@ -635,7 +643,7 @@ async function verDetallesSemana(id) { /* tu código original completo */
   }
 }
 
-function descargarDetalle(id) { /* tu código original */ 
+function descargarDetalle(id) {
   const modal = document.getElementById('modal-detalle');
   if (!modal) return;
   html2canvas(modal, {
