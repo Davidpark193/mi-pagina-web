@@ -1,4 +1,4 @@
-// ====================== script.js - TU CÓDIGO ORIGINAL ADAPTADO AL DISEÑO MODERNO ======================
+// ====================== script.js - TU CÓDIGO ORIGINAL + DISEÑO MODERNO ======================
 
 const meses = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
@@ -40,7 +40,6 @@ const listaTareas = [
 // Variables globales
 let dropdownAbierto = null;
 let semanaBase = new Date();
-let semanasGuardadas = JSON.parse(localStorage.getItem("semanasGuardadas")) || [];
 let cargandoLocal = false;
 
 // ==================== AUTOGUARDADO LOCAL ====================
@@ -128,10 +127,7 @@ function activarAutoGuardado() {
 // ==================== FUNCIONES ORIGINALES ====================
 function fechaUSA(fecha) {
   return fecha.toLocaleDateString('en-US', {
-    weekday: 'long',
-    month: 'long',
-    day: 'numeric',
-    year: 'numeric'
+    weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
   });
 }
 
@@ -165,7 +161,7 @@ function generarSemana() {
     row.innerHTML = `
       <td class="px-6 py-5 font-medium">${fechaUSA(d)}</td>
       <td class="px-6 py-5">
-        <div class="place-box flex gap-3">
+        <div class="flex gap-3 items-center">
           <select class="bg-slate-800 text-white rounded-3xl px-4 py-3 text-sm flex-1">
             <option>HOUSE 34 Seaview Montauk</option>
             <option>HOUSE 34 Seaside Montauk</option>
@@ -185,7 +181,7 @@ function generarSemana() {
             <option>HOUSE 69 Montauk</option>
             <option>Other Location</option>
           </select>
-          <button class="loc-btn" onclick="obtenerDireccion(this)" title="Get current location">📍</button>
+          <button onclick="obtenerDireccion(this)" class="loc-btn w-10 h-10 flex items-center justify-center text-xl">📍</button>
         </div>
         <div contenteditable="true" class="editable mt-3 text-slate-300 text-sm min-h-[42px] px-4 py-2 rounded-3xl border border-transparent focus:border-indigo-400"></div>
       </td>
@@ -212,7 +208,7 @@ function generarSemana() {
   }
 }
 
-// ==================== RESTO DE TU CÓDIGO ORIGINAL (SIN CAMBIOS) ====================
+// ==================== TODAS LAS DEMÁS FUNCIONES ORIGINALES (SIN CAMBIOS) ====================
 function resetearSemanaActual() {
   if (!confirm("¿Reiniciar la semana actual? Se borrará el avance guardado localmente.")) return;
   semanaBase = new Date();
@@ -221,11 +217,8 @@ function resetearSemanaActual() {
   alert("✅ Semana reiniciada a la actual");
 }
 
-function obtenerDireccion(btn) {
-  if (!navigator.geolocation) {
-    alert("Geolocation not supported");
-    return;
-  }
+function obtenerDireccion(btn) { /* tu código original completo */ 
+  if (!navigator.geolocation) { alert("Geolocation not supported"); return; }
   btn.innerHTML = "⏳";
   navigator.geolocation.getCurrentPosition(async (pos) => {
     try {
@@ -233,11 +226,7 @@ function obtenerDireccion(btn) {
       const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=18`);
       const data = await res.json();
       const addr = data.address || {};
-      const direccionBonita = [
-        addr.road || addr.residential || "",
-        addr.city || addr.town || addr.village || "",
-        addr.country || ""
-      ].filter(Boolean).join(", ");
+      const direccionBonita = [addr.road || addr.residential || "", addr.city || addr.town || addr.village || "", addr.country || ""].filter(Boolean).join(", ");
       btn.parentElement.parentElement.querySelector(".editable").innerText = direccionBonita || "Location captured";
       guardarLocal();
     } catch (e) {
@@ -245,19 +234,16 @@ function obtenerDireccion(btn) {
       guardarLocal();
     }
     btn.innerHTML = "📍";
-  }, () => {
-    alert("Location access denied");
-    btn.innerHTML = "📍";
-  });
+  }, () => { alert("Location access denied"); btn.innerHTML = "📍"; });
 }
 
-// Buscador de tareas (exacto como tenías)
+// Buscador de tareas (completo original)
 function cerrarTodosLosDropdowns() {
   document.querySelectorAll('.task-options').forEach(opt => { opt.style.display = 'none'; });
   dropdownAbierto = null;
 }
 
-function mostrarOpciones(input) {
+function mostrarOpciones(input) { /* tu código original */ 
   const container = input.parentElement;
   const optionsDiv = container.querySelector('.task-options');
   cerrarTodosLosDropdowns();
@@ -273,7 +259,7 @@ function mostrarOpciones(input) {
   });
 }
 
-function filtrarOpciones(input) {
+function filtrarOpciones(input) { /* tu código original */ 
   const container = input.parentElement;
   const optionsDiv = container.querySelector('.task-options');
   const filtro = input.value.toLowerCase().trim();
@@ -297,7 +283,7 @@ function filtrarOpciones(input) {
   optionsDiv.style.display = 'block';
 }
 
-function seleccionarTarea(input, texto) {
+function seleccionarTarea(input, texto) { /* tu código original */ 
   input.value = texto;
   const optionsDiv = input.parentElement.querySelector('.task-options');
   optionsDiv.style.display = 'none';
@@ -313,7 +299,7 @@ function seleccionarTarea(input, texto) {
   setTimeout(() => timeCell.focus(), 50);
 }
 
-function limpiarHorasAlEscribir(input) {
+function limpiarHorasAlEscribir(input) { /* tu código original */ 
   const row = input.closest('tr');
   const horasCell = row.querySelector(".horas");
   if (horasCell && horasCell.dataset.manual !== "true") {
@@ -327,8 +313,7 @@ function marcarManual(td) {
   guardarLocal();
 }
 
-// Calcular horas (exacto)
-function calcularHoras(guardar = true) {
+function calcularHoras(guardar = true) { /* tu código original completo */ 
   let total = 0;
   document.querySelectorAll("#body tr").forEach(fila => {
     const horasCell = fila.querySelector(".horas");
@@ -365,7 +350,7 @@ function calcularHoras(guardar = true) {
   if (guardar) guardarLocal();
 }
 
-function convertir(hora) {
+function convertir(hora) { /* tu código original */ 
   const m = hora.match(/(\d+):?(\d+)?\s*(am|pm)?/i);
   if (!m) return null;
   let h = parseInt(m[1]);
@@ -376,8 +361,8 @@ function convertir(hora) {
   return h * 60 + min;
 }
 
-// Guardar Semana (tu función original exacta)
-async function guardarSemana() {
+// ==================== GUARDAR SEMANA (ORIGINAL) ====================
+async function guardarSemana() { /* tu código original completo */ 
   if (!confirm("¿Guardar esta semana y pasar a la siguiente?")) return;
   const month = document.getElementById("month").value;
   const rows = [];
@@ -415,8 +400,8 @@ async function guardarSemana() {
   }
 }
 
-// Exportar PNG (tu función original)
-function descargar() {
+// ==================== EXPORTAR PNG (ORIGINAL) ====================
+function descargar() { /* tu código original completo */ 
   calcularHoras();
   const capture = document.getElementById("capture");
   html2canvas(capture, {
@@ -463,7 +448,7 @@ function descargar() {
     });
 }
 
-function limpiarParaExportarClonada(captureElement) {
+function limpiarParaExportarClonada(captureElement) { /* tu código original */ 
   const rows = captureElement.querySelectorAll("#tabla tbody tr");
   rows.forEach(fila => {
     const select = fila.querySelector("select");
@@ -516,12 +501,14 @@ function limpiarParaExportarClonada(captureElement) {
   }
 }
 
-// ==================== MODALES (TU CÓDIGO ORIGINAL) ====================
+// ==================== MODALES - EXACTAMENTE COMO ANTES ====================
 async function verSemanasGuardadas() {
   try {
     const response = await fetch('/api/semanas');
     const semanas = await response.json();
+
     let contenido = '';
+
     if (semanas.length === 0) {
       contenido = `<p style="text-align:center; padding:40px; color:#666;">No hay semanas guardadas todavía.</p>`;
     } else {
@@ -539,6 +526,7 @@ async function verSemanasGuardadas() {
           </div>`;
       });
     }
+
     const modalHTML = `
       <div id="modal-semanas" class="modal-overlay">
         <div class="modal-content">
@@ -555,19 +543,133 @@ async function verSemanasGuardadas() {
         </div>
       </div>
     `;
+
     if (document.getElementById('modal-semanas')) document.getElementById('modal-semanas').remove();
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+
   } catch (error) {
     alert("No se pudo conectar con el servidor.\nAsegúrate de que 'node server/server.js' esté corriendo.");
   }
 }
 
-// (Todas las demás funciones de modales que tenías se mantienen exactamente igual)
-async function eliminarSemana(id) { /* tu código original */ }
-async function verDetallesSemana(id) { /* tu código original */ }
-function descargarDetalle(id) { /* tu código original */ }
-function cerrarModal() { /* tu código original */ }
-function cerrarModalDetalle() { /* tu código original */ }
+// Todas las funciones de modales (exactas como tenías)
+async function eliminarSemana(id) {
+  if (!confirm("¿Estás seguro de que quieres eliminar esta semana?\nEsta acción no se puede deshacer.")) return;
+  try {
+    await fetch(`/api/semanas/${id}`, { method: 'DELETE' });
+    alert("✅ Semana eliminada correctamente");
+    verSemanasGuardadas();
+  } catch (error) {
+    alert("Error al eliminar la semana");
+  }
+}
+
+async function verDetallesSemana(id) { /* tu código original completo */ 
+  try {
+    const response = await fetch(`/api/semanas/${id}`);
+    const data = await response.json();
+    const rows = data.rows || data;
+    let filasHTML = '';
+    let totalHoras = 0;
+    rows.forEach(row => {
+      const horas = parseFloat(row.hours) || 0;
+      totalHoras += horas;
+      filasHTML += `
+        <tr>
+          <td>${row.date || ''}</td>
+          <td>${row.place || '—'}</td>
+          <td>${row.task || '—'}</td>
+          <td style="text-align:center;">${row.time || '—'}</td>
+          <td style="text-align:center; font-weight:700; color:#10b981;">${horas.toFixed(1)}</td>
+        </tr>`;
+    });
+    const detalleHTML = `
+      <div id="modal-detalle" class="modal-overlay">
+        <div class="modal-content detalle-modal">
+          <div class="modal-header">
+            <h2>Detalles de la Semana</h2>
+            <button onclick="cerrarModalDetalle()" class="btn-close">✕</button>
+          </div>
+          <div class="info-bar-modal">
+            <div class="info-group">
+              <div class="info-item">
+                <label>Employee</label>
+                <strong>Cristian Farez</strong>
+              </div>
+              <div class="info-item">
+                <label>Month</label>
+                <strong>${data.month || document.getElementById("month").value || "MAY"}</strong>
+              </div>
+            </div>
+          </div>
+          <div class="modal-body">
+            <table class="detalle-table">
+              <thead>
+                <tr>
+                  <th>Date</th>
+                  <th>Place / Location</th>
+                  <th>Notes / Task</th>
+                  <th>Time</th>
+                  <th>Hours</th>
+                </tr>
+              </thead>
+              <tbody>${filasHTML}</tbody>
+            </table>
+            <div class="total-row-modal">
+              <span class="total-label">Total Hours:</span>
+              <span class="total-value">${totalHoras.toFixed(1)}</span>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button onclick="descargarDetalle(${id})" class="btn-success">📥 Descargar como PNG</button>
+            <button onclick="cerrarModalDetalle()" class="btn-secondary">Volver</button>
+          </div>
+        </div>
+      </div>
+    `;
+    if (document.getElementById('modal-detalle')) document.getElementById('modal-detalle').remove();
+    document.body.insertAdjacentHTML('beforeend', detalleHTML);
+  } catch (error) {
+    console.error(error);
+    alert("Error al cargar los detalles.");
+  }
+}
+
+function descargarDetalle(id) { /* tu código original */ 
+  const modal = document.getElementById('modal-detalle');
+  if (!modal) return;
+  html2canvas(modal, {
+    scale: 3,
+    backgroundColor: "#ffffff",
+    logging: false,
+    onclone: (clonedDoc) => {
+      const clonedModal = clonedDoc.getElementById('modal-detalle');
+      if (clonedModal) {
+        const footer = clonedModal.querySelector('.modal-footer');
+        if (footer) footer.style.display = 'none';
+        clonedModal.style.width = "1150px";
+        clonedModal.style.margin = "0 auto";
+        clonedModal.style.padding = "20px";
+      }
+    }
+  }).then(canvas => {
+    const link = document.createElement("a");
+    const month = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+    link.download = `Detalle_Semana_${month}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
+}
+
+function cerrarModal() {
+  const modal = document.getElementById('modal-semanas');
+  if (modal) modal.remove();
+}
+
+function cerrarModalDetalle() {
+  const modal = document.getElementById('modal-detalle');
+  if (modal) modal.remove();
+}
 
 document.addEventListener('keydown', function(e) {
   if (e.key === "Escape") {
