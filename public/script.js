@@ -39,6 +39,112 @@ const listaTareas = [
 let dropdownAbierto = null;
 let semanaBase = new Date();
 let semanasGuardadas = JSON.parse(localStorage.getItem("semanasGuardadas")) || [];
+let cargandoLocal = false;
+
+// ==================== AUTOGUARDADO LOCAL ====================
+
+function guardarLocal() {
+  if (cargandoLocal) return;
+
+  const data = {
+    semanaBase: semanaBase.toISOString(),
+    month: document.getElementById("month")?.value || "",
+    total: document.getElementById("total")?.getAttribute("data-total") || document.getElementById("total")?.innerText || "0.0",
+    rows: []
+  };
+
+  document.querySelectorAll("#body tr").forEach(tr => {
+    const placeSelect = tr.querySelector("select");
+    const placeEditable = tr.cells[1]?.querySelector(".editable");
+    const taskInput = tr.querySelector(".task-search-input");
+    const horasCell = tr.querySelector(".horas");
+
+    data.rows.push({
+      date: tr.cells[0]?.innerText.trim() || "",
+      placeSelect: placeSelect?.value || "",
+      placeText: placeEditable?.innerText.trim() || "",
+      task: taskInput?.value.trim() || "",
+      time: tr.cells[3]?.innerText.trim() || "",
+      hours: horasCell?.innerText.trim() || "0.0",
+      manual: horasCell?.dataset.manual === "true"
+    });
+  });
+
+  localStorage.setItem("semana_actual_payroll", JSON.stringify(data));
+}
+
+function cargarLocal() {
+  const saved = localStorage.getItem("semana_actual_payroll");
+  if (!saved) return;
+
+  try {
+    cargandoLocal = true;
+    const data = JSON.parse(saved);
+
+    if (data.semanaBase) {
+      semanaBase = new Date(data.semanaBase);
+    }
+
+    const filas = document.querySelectorAll("#body tr");
+
+    data.rows?.forEach((row, index) => {
+      const tr = filas[index];
+      if (!tr) return;
+
+      if (tr.cells[0]) tr.cells[0].innerText = row.date || "";
+
+      const select = tr.querySelector("select");
+      if (select && row.placeSelect) select.value = row.placeSelect;
+
+      const placeEditable = tr.cells[1]?.querySelector(".editable");
+      if (placeEditable) placeEditable.innerText = row.placeText || "";
+
+      const taskInput = tr.querySelector(".task-search-input");
+      if (taskInput) taskInput.value = row.task || "";
+
+      if (tr.cells[3]) tr.cells[3].innerText = row.time || "";
+
+      const horasCell = tr.querySelector(".horas");
+      if (horasCell) {
+        horasCell.innerText = row.hours || "0.0";
+        if (row.manual) horasCell.dataset.manual = "true";
+        else delete horasCell.dataset.manual;
+      }
+    });
+
+    if (data.month) {
+      const monthEl = document.getElementById("month");
+      if (monthEl) monthEl.value = data.month;
+    }
+
+    const totalEl = document.getElementById("total");
+    if (totalEl) {
+      const total = data.total || "0.0";
+      totalEl.setAttribute("data-total", total);
+      totalEl.innerText = parseFloat(total).toFixed(1);
+    }
+
+    calcularHoras(false);
+  } catch (error) {
+    console.error("Error cargando guardado local:", error);
+  } finally {
+    cargandoLocal = false;
+  }
+}
+
+function limpiarGuardadoLocal() {
+  localStorage.removeItem("semana_actual_payroll");
+}
+
+function activarAutoGuardado() {
+  document.addEventListener("input", () => {
+    guardarLocal();
+  });
+
+  document.addEventListener("change", () => {
+    guardarLocal();
+  });
+}
 
 // ==================== FUNCIONES ORIGINALES ====================
 
@@ -67,10 +173,10 @@ function generarSemana() {
 
   // === FORZAR INICIO DE SEMANA EN LUNES ===
   let lunes = new Date(semanaBase);
-  lunes.setHours(0, 0, 0, 0); // Limpiar hora
+  lunes.setHours(0, 0, 0, 0);
 
   const dia = lunes.getDay();
-  const diff = lunes.getDate() - dia + (dia === 0 ? -6 : 1); // Lunes
+  const diff = lunes.getDate() - dia + (dia === 0 ? -6 : 1);
   lunes.setDate(diff);
 
   actualizarMes(lunes);
@@ -130,9 +236,11 @@ function generarSemana() {
   }
 }
 
-// Botón para resetear a la semana actual (útil cuando se desincroniza)
+// Botón para resetear a la semana actual
 function resetearSemanaActual() {
+  if (!confirm("¿Reiniciar la semana actual? Se borrará el avance guardado localmente.")) return;
   semanaBase = new Date();
+  limpiarGuardadoLocal();
   generarSemana();
   alert("✅ Semana reiniciada a la actual");
 }
@@ -155,8 +263,10 @@ function obtenerDireccion(btn) {
         addr.country || ""
       ].filter(Boolean).join(", ");
       btn.parentElement.parentElement.querySelector(".editable").innerText = direccionBonita || "Location captured";
+      guardarLocal();
     } catch (e) {
       btn.parentElement.parentElement.querySelector(".editable").innerText = "Could not get address";
+      guardarLocal();
     }
     btn.innerHTML = "📍";
   }, () => {
@@ -234,6 +344,8 @@ function seleccionarTarea(input, texto) {
     delete horasCell.dataset.manual;
   }
 
+  guardarLocal();
+
   const timeCell = row.cells[3];
   setTimeout(() => timeCell.focus(), 50);
 }
@@ -244,15 +356,17 @@ function limpiarHorasAlEscribir(input) {
   if (horasCell && horasCell.dataset.manual !== "true") {
     horasCell.innerText = "0.0";
   }
+  guardarLocal();
 }
 
 function marcarManual(td) {
   td.dataset.manual = "true";
+  guardarLocal();
 }
 
 // ==================== CALCULAR HORAS ====================
 
-function calcularHoras() {
+function calcularHoras(guardar = true) {
   let total = 0;
   document.querySelectorAll("#body tr").forEach(fila => {
     const horasCell = fila.querySelector(".horas");
@@ -295,6 +409,8 @@ function calcularHoras() {
   const totalEl = document.getElementById("total");
   totalEl.setAttribute("data-total", total.toFixed(1));
   totalEl.innerText = total.toFixed(1);
+
+  if (guardar) guardarLocal();
 }
 
 function convertir(hora) {
@@ -320,7 +436,7 @@ async function guardarSemana() {
     const placeSelect = tr.querySelector("select");
     const placeEditable = tr.querySelector(".editable");
     const place = (placeEditable && placeEditable.innerText.trim()) || (placeSelect ? placeSelect.value : "");
-    
+
     const taskInput = tr.querySelector('.task-search-input');
     const task = taskInput ? taskInput.value.trim() : "";
 
@@ -343,8 +459,10 @@ async function guardarSemana() {
 
     if (data.success) {
       alert("✅ Semana guardada correctamente en la base de datos");
+      limpiarGuardadoLocal();
       semanaBase.setDate(semanaBase.getDate() + 7);
       generarSemana();
+      guardarLocal();
     } else {
       alert("Error al guardar: " + (data.message || "Desconocido"));
     }
@@ -356,117 +474,113 @@ async function guardarSemana() {
 
 // ==================== EXPORTAR PNG ====================
 function descargar() {
-    calcularHoras();
+  calcularHoras();
 
-    const capture = document.getElementById("capture");
+  const capture = document.getElementById("capture");
 
-    html2canvas(capture, {
-        scale: 3,
-        backgroundColor: "#ffffff",
-        logging: false,
-        onclone: (clonedDoc) => {
-            const clonedCapture = clonedDoc.getElementById("capture");
-            if (!clonedCapture) return;
+  html2canvas(capture, {
+    scale: 3,
+    backgroundColor: "#ffffff",
+    logging: false,
+    onclone: (clonedDoc) => {
+      const clonedCapture = clonedDoc.getElementById("capture");
+      if (!clonedCapture) return;
 
-            clonedCapture.classList.add("export-mode");
+      clonedCapture.classList.add("export-mode");
 
-            // === ANCHO OPTIMO PARA MÓVIL Y PC ===
-            clonedCapture.style.width = "auto";
-            clonedCapture.style.minWidth = "1080px";
-            clonedCapture.style.maxWidth = "1380px";
-            clonedCapture.style.margin = "0 auto";
-            clonedCapture.style.padding = "32px 38px";
-            clonedCapture.style.boxSizing = "border-box";
-            clonedCapture.style.fontFamily = "Arial, sans-serif";
+      clonedCapture.style.width = "auto";
+      clonedCapture.style.minWidth = "1080px";
+      clonedCapture.style.maxWidth = "1380px";
+      clonedCapture.style.margin = "0 auto";
+      clonedCapture.style.padding = "32px 38px";
+      clonedCapture.style.boxSizing = "border-box";
+      clonedCapture.style.fontFamily = "Arial, sans-serif";
 
-            const tabla = clonedCapture.querySelector("#tabla");
-            if (tabla) {
-                tabla.style.width = "100%";
-                tabla.style.tableLayout = "fixed";
-            }
+      const tabla = clonedCapture.querySelector("#tabla");
+      if (tabla) {
+        tabla.style.width = "100%";
+        tabla.style.tableLayout = "fixed";
+      }
 
-            // === MEJORAR ENCABEZADOS ===
-            const headers = clonedCapture.querySelectorAll("th");
-            headers.forEach((th, index) => {
-                th.style.textAlign = "center";
-                th.style.verticalAlign = "middle";
-                th.style.padding = "15px 10px";
-                th.style.fontSize = "15.5px";
-                th.style.fontWeight = "600";
-            });
+      const headers = clonedCapture.querySelectorAll("th");
+      headers.forEach((th) => {
+        th.style.textAlign = "center";
+        th.style.verticalAlign = "middle";
+        th.style.padding = "15px 10px";
+        th.style.fontSize = "15.5px";
+        th.style.fontWeight = "600";
+      });
 
-            limpiarParaExportarClonada(clonedCapture);
-        }
-    })
+      limpiarParaExportarClonada(clonedCapture);
+    }
+  })
     .then(canvas => {
-        const link = document.createElement("a");
-        const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
-        link.download = `Payroll_${monthValue}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
+      const link = document.createElement("a");
+      const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+      link.download = `Payroll_${monthValue}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
     })
-    .catch(err => console.error(err));
+    .catch(err => {
+      console.error(err);
+      alert("Hubo un error al generar la imagen.");
+    });
 }
 
-
 function limpiarParaExportarClonada(captureElement) {
-    const rows = captureElement.querySelectorAll("#tabla tbody tr");
+  const rows = captureElement.querySelectorAll("#tabla tbody tr");
 
-    rows.forEach(fila => {
-        // PLACE / LOCATION
-        const select = fila.querySelector("select");
-        const direccion = fila.querySelector(".editable");
-        let textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
+  rows.forEach(fila => {
+    const select = fila.querySelector("select");
+    const direccion = fila.querySelector(".editable");
+    let textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
 
-        const divLugar = document.createElement("div");
-        divLugar.style.fontWeight = "600";
-        divLugar.style.fontSize = "14px";
-        divLugar.style.lineHeight = "1.4";
-        divLugar.style.wordBreak = "break-word";
-        divLugar.style.whiteSpace = "normal";
-        divLugar.innerText = textoLugar;
-        fila.cells[1].innerHTML = "";
-        fila.cells[1].appendChild(divLugar);
+    const divLugar = document.createElement("div");
+    divLugar.style.fontWeight = "600";
+    divLugar.style.fontSize = "14px";
+    divLugar.style.lineHeight = "1.4";
+    divLugar.style.wordBreak = "break-word";
+    divLugar.style.whiteSpace = "normal";
+    divLugar.innerText = textoLugar;
+    fila.cells[1].innerHTML = "";
+    fila.cells[1].appendChild(divLugar);
 
-        // TASK
-        const taskInput = fila.querySelector(".task-search-input");
-        if (taskInput) {
-            let taskText = taskInput.value.trim() || "—";
-            const divTask = document.createElement("div");
-            divTask.style.fontWeight = "500";
-            divTask.style.fontSize = "14px";
-            divTask.style.lineHeight = "1.4";
-            divTask.style.wordBreak = "break-word";
-            divTask.style.whiteSpace = "normal";
-            divTask.innerText = taskText;
-            fila.cells[2].innerHTML = "";
-            fila.cells[2].appendChild(divTask);
-        }
-
-        // TIME
-        const timeCell = fila.cells[3];
-        const timeText = timeCell.innerText.trim() || "—";
-        const divTime = document.createElement("div");
-        divTime.style.fontWeight = "500";
-        divTime.style.fontSize = "14.5px";
-        divTime.style.textAlign = "center";
-        divTime.innerText = timeText;
-        fila.cells[3].innerHTML = "";
-        fila.cells[3].appendChild(divTime);
-
-        // HOURS
-        const hoursCell = fila.cells[4];
-        if (hoursCell) {
-            hoursCell.style.fontWeight = "700";
-            hoursCell.style.textAlign = "center";
-        }
-    });
-
-    const totalEl = captureElement.querySelector("#total");
-    if (totalEl) {
-        totalEl.style.fontSize = "18px";
-        totalEl.style.fontWeight = "bold";
+    const taskInput = fila.querySelector(".task-search-input");
+    if (taskInput) {
+      let taskText = taskInput.value.trim() || "—";
+      const divTask = document.createElement("div");
+      divTask.style.fontWeight = "500";
+      divTask.style.fontSize = "14px";
+      divTask.style.lineHeight = "1.4";
+      divTask.style.wordBreak = "break-word";
+      divTask.style.whiteSpace = "normal";
+      divTask.innerText = taskText;
+      fila.cells[2].innerHTML = "";
+      fila.cells[2].appendChild(divTask);
     }
+
+    const timeCell = fila.cells[3];
+    const timeText = timeCell.innerText.trim() || "—";
+    const divTime = document.createElement("div");
+    divTime.style.fontWeight = "500";
+    divTime.style.fontSize = "14.5px";
+    divTime.style.textAlign = "center";
+    divTime.innerText = timeText;
+    fila.cells[3].innerHTML = "";
+    fila.cells[3].appendChild(divTime);
+
+    const hoursCell = fila.cells[4];
+    if (hoursCell) {
+      hoursCell.style.fontWeight = "700";
+      hoursCell.style.textAlign = "center";
+    }
+  });
+
+  const totalEl = captureElement.querySelector("#total");
+  if (totalEl) {
+    totalEl.style.fontSize = "18px";
+    totalEl.style.fontWeight = "bold";
+  }
 }
 
 // ==================== MODALES ====================
@@ -562,7 +676,6 @@ async function verDetallesSemana(id) {
             <button onclick="cerrarModalDetalle()" class="btn-close">✕</button>
           </div>
 
-          <!-- NUEVO: Employee + Month -->
           <div class="info-bar-modal">
             <div class="info-group">
               <div class="info-item">
@@ -590,7 +703,6 @@ async function verDetallesSemana(id) {
               <tbody>${filasHTML}</tbody>
             </table>
 
-            <!-- Total -->
             <div class="total-row-modal">
               <span class="total-label">Total Hours:</span>
               <span class="total-value">${totalHoras.toFixed(1)}</span>
@@ -614,7 +726,6 @@ async function verDetallesSemana(id) {
   }
 }
 
-// Descargar solo el modal de detalles como PNG
 function descargarDetalle(id) {
   const modal = document.getElementById('modal-detalle');
   if (!modal) return;
@@ -626,7 +737,6 @@ function descargarDetalle(id) {
     onclone: (clonedDoc) => {
       const clonedModal = clonedDoc.getElementById('modal-detalle');
       if (clonedModal) {
-        // Ocultar botones al exportar
         const footer = clonedModal.querySelector('.modal-footer');
         if (footer) footer.style.display = 'none';
 
@@ -662,4 +772,8 @@ document.addEventListener('keydown', function(e) {
 });
 
 // Iniciar la aplicación
-window.onload = generarSemana;
+window.onload = () => {
+  generarSemana();
+  cargarLocal();
+  activarAutoGuardado();
+};
