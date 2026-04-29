@@ -1,5 +1,3 @@
-// ====================== script.js - TU CÓDIGO ORIGINAL COMPLETO (EXPORTACIÓN ARREGLADA) ======================
-
 const meses = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
 
 const listaTareas = [
@@ -40,22 +38,27 @@ const listaTareas = [
 // Variables globales
 let dropdownAbierto = null;
 let semanaBase = new Date();
+let semanasGuardadas = JSON.parse(localStorage.getItem("semanasGuardadas")) || [];
 let cargandoLocal = false;
 
 // ==================== AUTOGUARDADO LOCAL ====================
+
 function guardarLocal() {
   if (cargandoLocal) return;
+
   const data = {
     semanaBase: semanaBase.toISOString(),
     month: document.getElementById("month")?.value || "",
     total: document.getElementById("total")?.getAttribute("data-total") || document.getElementById("total")?.innerText || "0.0",
     rows: []
   };
+
   document.querySelectorAll("#body tr").forEach(tr => {
     const placeSelect = tr.querySelector("select");
     const placeEditable = tr.cells[1]?.querySelector(".editable");
     const taskInput = tr.querySelector(".task-search-input");
     const horasCell = tr.querySelector(".horas");
+
     data.rows.push({
       date: tr.cells[0]?.innerText.trim() || "",
       placeSelect: placeSelect?.value || "",
@@ -66,30 +69,41 @@ function guardarLocal() {
       manual: horasCell?.dataset.manual === "true"
     });
   });
+
   localStorage.setItem("semana_actual_payroll", JSON.stringify(data));
 }
 
 function cargarLocal() {
   const saved = localStorage.getItem("semana_actual_payroll");
   if (!saved) return;
+
   try {
     cargandoLocal = true;
     const data = JSON.parse(saved);
+
     if (data.semanaBase) {
       semanaBase = new Date(data.semanaBase);
     }
+
     const filas = document.querySelectorAll("#body tr");
+
     data.rows?.forEach((row, index) => {
       const tr = filas[index];
       if (!tr) return;
+
       if (tr.cells[0]) tr.cells[0].innerText = row.date || "";
+
       const select = tr.querySelector("select");
       if (select && row.placeSelect) select.value = row.placeSelect;
+
       const placeEditable = tr.cells[1]?.querySelector(".editable");
       if (placeEditable) placeEditable.innerText = row.placeText || "";
+
       const taskInput = tr.querySelector(".task-search-input");
       if (taskInput) taskInput.value = row.task || "";
+
       if (tr.cells[3]) tr.cells[3].innerText = row.time || "";
+
       const horasCell = tr.querySelector(".horas");
       if (horasCell) {
         horasCell.innerText = row.hours || "0.0";
@@ -97,16 +111,19 @@ function cargarLocal() {
         else delete horasCell.dataset.manual;
       }
     });
+
     if (data.month) {
       const monthEl = document.getElementById("month");
       if (monthEl) monthEl.value = data.month;
     }
+
     const totalEl = document.getElementById("total");
     if (totalEl) {
       const total = data.total || "0.0";
       totalEl.setAttribute("data-total", total);
       totalEl.innerText = parseFloat(total).toFixed(1);
     }
+
     calcularHoras(false);
   } catch (error) {
     console.error("Error cargando guardado local:", error);
@@ -120,13 +137,24 @@ function limpiarGuardadoLocal() {
 }
 
 function activarAutoGuardado() {
-  document.addEventListener("input", () => { guardarLocal(); });
-  document.addEventListener("change", () => { guardarLocal(); });
+  document.addEventListener("input", () => {
+    guardarLocal();
+  });
+
+  document.addEventListener("change", () => {
+    guardarLocal();
+  });
 }
 
 // ==================== FUNCIONES ORIGINALES ====================
+
 function fechaUSA(fecha) {
-  return fecha.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  return fecha.toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric'
+  });
 }
 
 function actualizarMes(lunes) {
@@ -138,13 +166,15 @@ function actualizarMes(lunes) {
   document.getElementById("month").value = resultado;
 }
 
-// ==================== GENERAR SEMANA ====================
+// ==================== FUNCIÓN ACTUALIZADA CON TODAS LAS CASAS ====================
 function generarSemana() {
   const body = document.getElementById("body");
   body.innerHTML = "";
 
+  // === FORZAR INICIO DE SEMANA EN LUNES ===
   let lunes = new Date(semanaBase);
   lunes.setHours(0, 0, 0, 0);
+
   const dia = lunes.getDay();
   const diff = lunes.getDate() - dia + (dia === 0 ? -6 : 1);
   lunes.setDate(diff);
@@ -157,10 +187,10 @@ function generarSemana() {
 
     const row = document.createElement('tr');
     row.innerHTML = `
-      <td class="px-6 py-5 font-medium">${fechaUSA(d)}</td>
-      <td class="px-6 py-5">
-        <div class="flex gap-3 items-center">
-          <select class="bg-slate-800 text-white rounded-3xl px-4 py-3 text-sm flex-1">
+      <td class="date-cell" contenteditable="true">${fechaUSA(d)}</td>
+      <td>
+        <div class="place-box">
+          <select>
             <option>HOUSE 34 Seaview Montauk</option>
             <option>HOUSE 34 Seaside Montauk</option>
             <option>HOUSE 73 Seaview Montauk</option>
@@ -179,19 +209,19 @@ function generarSemana() {
             <option>HOUSE 69 Montauk</option>
             <option>Other Location</option>
           </select>
-          <button onclick="obtenerDireccion(this)" class="loc-btn w-10 h-10 flex items-center justify-center text-xl">📍</button>
+          <button class="loc-btn" onclick="obtenerDireccion(this)" title="Get current location">📍</button>
         </div>
-        <div contenteditable="true" class="editable mt-3 text-slate-300 text-sm min-h-[42px] px-4 py-2 rounded-3xl border border-transparent focus:border-indigo-400"></div>
+        <div contenteditable="true" class="editable"></div>
       </td>
-      <td class="px-6 py-5">
-        <div class="task-search-container relative">
-          <input type="text" class="task-search-input" placeholder="Buscar o escribir tarea..."
+      <td>
+        <div class="task-search-container">
+          <input type="text" class="task-search-input" placeholder="Buscar o escribir tarea..." 
                  onfocus="mostrarOpciones(this)" oninput="filtrarOpciones(this); limpiarHorasAlEscribir(this)">
-          <div class="task-options hidden absolute w-full mt-2 z-50"></div>
+          <div class="task-options" style="display:none;"></div>
         </div>
       </td>
-      <td contenteditable="true" class="editable text-center px-6 py-5 font-medium" oninput="calcularHoras()"></td>
-      <td contenteditable="true" class="horas text-center px-6 py-5 font-bold text-emerald-400 text-xl" oninput="marcarManual(this)">0.0</td>
+      <td contenteditable="true" class="editable" oninput="calcularHoras()"></td>
+      <td contenteditable="true" class="horas" oninput="marcarManual(this)">0.0</td>
     `;
     body.appendChild(row);
 
@@ -206,7 +236,7 @@ function generarSemana() {
   }
 }
 
-// ==================== EL RESTO DE TU CÓDIGO ORIGINAL ====================
+// Botón para resetear a la semana actual
 function resetearSemanaActual() {
   if (!confirm("¿Reiniciar la semana actual? Se borrará el avance guardado localmente.")) return;
   semanaBase = new Date();
@@ -245,6 +275,8 @@ function obtenerDireccion(btn) {
   });
 }
 
+// ==================== BUSCADOR DE TAREAS ====================
+
 function cerrarTodosLosDropdowns() {
   document.querySelectorAll('.task-options').forEach(opt => {
     opt.style.display = 'none';
@@ -255,13 +287,16 @@ function cerrarTodosLosDropdowns() {
 function mostrarOpciones(input) {
   const container = input.parentElement;
   const optionsDiv = container.querySelector('.task-options');
+
   cerrarTodosLosDropdowns();
   dropdownAbierto = optionsDiv;
+
   optionsDiv.innerHTML = '';
   optionsDiv.style.display = 'block';
+
   listaTareas.forEach(tarea => {
     const div = document.createElement('div');
-    div.className = 'task-option px-5 py-3 hover:bg-indigo-500/20 text-slate-200 cursor-pointer text-sm';
+    div.className = 'task-option';
     div.textContent = tarea;
     div.onclick = () => seleccionarTarea(input, tarea);
     optionsDiv.appendChild(div);
@@ -272,23 +307,27 @@ function filtrarOpciones(input) {
   const container = input.parentElement;
   const optionsDiv = container.querySelector('.task-options');
   const filtro = input.value.toLowerCase().trim();
+
   optionsDiv.innerHTML = '';
+
   const filtradas = listaTareas.filter(tarea => tarea.toLowerCase().includes(filtro));
+
   if (filtradas.length > 0) {
     filtradas.forEach(tarea => {
       const div = document.createElement('div');
-      div.className = 'task-option px-5 py-3 hover:bg-indigo-500/20 text-slate-200 cursor-pointer text-sm';
+      div.className = 'task-option';
       div.textContent = tarea;
       div.onclick = () => seleccionarTarea(input, tarea);
       optionsDiv.appendChild(div);
     });
   } else if (filtro !== '') {
     const customDiv = document.createElement('div');
-    customDiv.className = 'task-option custom px-5 py-3 italic text-slate-400 cursor-pointer';
+    customDiv.className = 'task-option custom';
     customDiv.textContent = `Usar: "${filtro}"`;
     customDiv.onclick = () => seleccionarTarea(input, filtro);
     optionsDiv.appendChild(customDiv);
   }
+
   optionsDiv.style.display = 'block';
 }
 
@@ -297,13 +336,16 @@ function seleccionarTarea(input, texto) {
   const optionsDiv = input.parentElement.querySelector('.task-options');
   optionsDiv.style.display = 'none';
   dropdownAbierto = null;
+
   const row = input.closest('tr');
   const horasCell = row.querySelector(".horas");
   if (horasCell && horasCell.dataset.manual !== "true") {
     horasCell.innerText = "0.0";
     delete horasCell.dataset.manual;
   }
+
   guardarLocal();
+
   const timeCell = row.cells[3];
   setTimeout(() => timeCell.focus(), 50);
 }
@@ -322,40 +364,52 @@ function marcarManual(td) {
   guardarLocal();
 }
 
+// ==================== CALCULAR HORAS ====================
+
 function calcularHoras(guardar = true) {
   let total = 0;
   document.querySelectorAll("#body tr").forEach(fila => {
     const horasCell = fila.querySelector(".horas");
+
     if (horasCell.dataset.manual === "true") {
       total += parseFloat(horasCell.innerText) || 0;
       return;
     }
+
     const texto = fila.cells[3].innerText.toLowerCase().trim();
     let suma = 0;
     const bloques = texto.split(",");
+
     bloques.forEach(b => {
       if (b.includes("-")) {
         let [inicio, fin] = b.split("-").map(x => x.trim());
         let h1 = convertir(inicio);
         let h2 = convertir(fin);
+
         if (h1 !== null && h2 !== null) {
           let minutosTotales = h2 - h1;
           let horas = minutosTotales / 60;
           if (horas < 0) horas += 24;
+
           const inicioEs30 = inicio.includes(":30");
           const finEs30 = fin.includes(":30");
+
           if (inicioEs30 && finEs30) horas -= 1;
           else if (inicioEs30 || finEs30) horas -= 0.5;
+
           suma += horas;
         }
       }
     });
+
     horasCell.innerText = suma.toFixed(1);
     total += suma;
   });
+
   const totalEl = document.getElementById("total");
   totalEl.setAttribute("data-total", total.toFixed(1));
   totalEl.innerText = total.toFixed(1);
+
   if (guardar) guardarLocal();
 }
 
@@ -370,29 +424,39 @@ function convertir(hora) {
   return h * 60 + min;
 }
 
+// ==================== GUARDAR SEMANA ====================
 async function guardarSemana() {
   if (!confirm("¿Guardar esta semana y pasar a la siguiente?")) return;
+
   const month = document.getElementById("month").value;
   const rows = [];
+
   document.querySelectorAll("#body tr").forEach(tr => {
     const date = tr.cells[0].innerText.trim();
     const placeSelect = tr.querySelector("select");
     const placeEditable = tr.querySelector(".editable");
     const place = (placeEditable && placeEditable.innerText.trim()) || (placeSelect ? placeSelect.value : "");
+
     const taskInput = tr.querySelector('.task-search-input');
     const task = taskInput ? taskInput.value.trim() : "";
+
     const time = tr.cells[3].innerText.trim();
     const hours = parseFloat(tr.querySelector(".horas").innerText) || 0;
+
     rows.push({ date, place, task, time, hours });
   });
+
   const total_hours = parseFloat(document.getElementById("total").getAttribute("data-total")) || 0;
+
   try {
     const response = await fetch('/api/semanas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ month, rows, total_hours })
     });
+
     const data = await response.json();
+
     if (data.success) {
       alert("✅ Semana guardada correctamente en la base de datos");
       limpiarGuardadoLocal();
@@ -404,22 +468,26 @@ async function guardarSemana() {
     }
   } catch (error) {
     console.error(error);
-    alert("❌ No se pudo conectar con el servidor.");
+    alert("❌ No se pudo conectar con el servidor.\nAsegúrate de que 'node server/server.js' esté corriendo.");
   }
 }
 
-// ==================== EXPORTAR PNG PRINCIPAL ====================
+// ==================== EXPORTAR PNG ====================
 function descargar() {
   calcularHoras();
+
   const capture = document.getElementById("capture");
+
   html2canvas(capture, {
     scale: 3,
-    backgroundColor: "#0f172a",
+    backgroundColor: "#ffffff",
     logging: false,
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
       if (!clonedCapture) return;
+
       clonedCapture.classList.add("export-mode");
+
       clonedCapture.style.width = "auto";
       clonedCapture.style.minWidth = "1080px";
       clonedCapture.style.maxWidth = "1380px";
@@ -427,11 +495,13 @@ function descargar() {
       clonedCapture.style.padding = "32px 38px";
       clonedCapture.style.boxSizing = "border-box";
       clonedCapture.style.fontFamily = "Arial, sans-serif";
+
       const tabla = clonedCapture.querySelector("#tabla");
       if (tabla) {
         tabla.style.width = "100%";
         tabla.style.tableLayout = "fixed";
       }
+
       const headers = clonedCapture.querySelectorAll("th");
       headers.forEach((th) => {
         th.style.textAlign = "center";
@@ -440,6 +510,7 @@ function descargar() {
         th.style.fontSize = "15.5px";
         th.style.fontWeight = "600";
       });
+
       limpiarParaExportarClonada(clonedCapture);
     }
   })
@@ -458,10 +529,12 @@ function descargar() {
 
 function limpiarParaExportarClonada(captureElement) {
   const rows = captureElement.querySelectorAll("#tabla tbody tr");
+
   rows.forEach(fila => {
     const select = fila.querySelector("select");
     const direccion = fila.querySelector(".editable");
     let textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
+
     const divLugar = document.createElement("div");
     divLugar.style.fontWeight = "600";
     divLugar.style.fontSize = "14px";
@@ -502,6 +575,7 @@ function limpiarParaExportarClonada(captureElement) {
       hoursCell.style.textAlign = "center";
     }
   });
+
   const totalEl = captureElement.querySelector("#total");
   if (totalEl) {
     totalEl.style.fontSize = "18px";
@@ -509,45 +583,14 @@ function limpiarParaExportarClonada(captureElement) {
   }
 }
 
-// ==================== EXPORTAR DETALLE DE SEMANA (ARREGLADO) ====================
-function descargarDetalle(id) {
-  const modal = document.getElementById('modal-detalle');
-  if (!modal) return;
-
-  html2canvas(modal, {
-    scale: 3,
-    backgroundColor: "#0f172a",
-    logging: false,
-    onclone: (clonedDoc) => {
-      const clonedModal = clonedDoc.getElementById('modal-detalle');
-      if (!clonedModal) return;
-
-      // Ocultar footer y botón de cerrar
-      const footer = clonedModal.querySelector('.modal-footer');
-      if (footer) footer.style.display = 'none';
-      const closeBtn = clonedModal.querySelector('.btn-close');
-      if (closeBtn) closeBtn.style.display = 'none';
-
-      clonedModal.style.width = "1150px";
-      clonedModal.style.margin = "0 auto";
-      clonedModal.style.padding = "20px";
-      clonedModal.style.background = "#0f172a";
-    }
-  }).then(canvas => {
-    const link = document.createElement("a");
-    const month = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
-    link.download = `Detalle_Semana_${month}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
-}
-
-// ==================== MODALES (TU CÓDIGO ORIGINAL) ====================
+// ==================== MODALES ====================
 async function verSemanasGuardadas() {
   try {
     const response = await fetch('/api/semanas');
     const semanas = await response.json();
+
     let contenido = '';
+
     if (semanas.length === 0) {
       contenido = `<p style="text-align:center; padding:40px; color:#666;">No hay semanas guardadas todavía.</p>`;
     } else {
@@ -565,6 +608,7 @@ async function verSemanasGuardadas() {
           </div>`;
       });
     }
+
     const modalHTML = `
       <div id="modal-semanas" class="modal-overlay">
         <div class="modal-content">
@@ -581,8 +625,10 @@ async function verSemanasGuardadas() {
         </div>
       </div>
     `;
+
     if (document.getElementById('modal-semanas')) document.getElementById('modal-semanas').remove();
     document.body.insertAdjacentHTML('beforeend', modalHTML);
+
   } catch (error) {
     alert("No se pudo conectar con el servidor.\nAsegúrate de que 'node server/server.js' esté corriendo.");
   }
@@ -603,12 +649,15 @@ async function verDetallesSemana(id) {
   try {
     const response = await fetch(`/api/semanas/${id}`);
     const data = await response.json();
+
     const rows = data.rows || data;
     let filasHTML = '';
     let totalHoras = 0;
+
     rows.forEach(row => {
       const horas = parseFloat(row.hours) || 0;
       totalHoras += horas;
+
       filasHTML += `
         <tr>
           <td>${row.date || ''}</td>
@@ -618,6 +667,7 @@ async function verDetallesSemana(id) {
           <td style="text-align:center; font-weight:700; color:#10b981;">${horas.toFixed(1)}</td>
         </tr>`;
     });
+
     const detalleHTML = `
       <div id="modal-detalle" class="modal-overlay">
         <div class="modal-content detalle-modal">
@@ -625,6 +675,7 @@ async function verDetallesSemana(id) {
             <h2>Detalles de la Semana</h2>
             <button onclick="cerrarModalDetalle()" class="btn-close">✕</button>
           </div>
+
           <div class="info-bar-modal">
             <div class="info-group">
               <div class="info-item">
@@ -633,10 +684,11 @@ async function verDetallesSemana(id) {
               </div>
               <div class="info-item">
                 <label>Month</label>
-                <strong>${data.month || document.getElementById("month").value || "MAY"}</strong>
+                <strong>${data.month || document.getElementById("month").value || "APRIL - MAY"}</strong>
               </div>
             </div>
           </div>
+
           <div class="modal-body">
             <table class="detalle-table">
               <thead>
@@ -650,11 +702,13 @@ async function verDetallesSemana(id) {
               </thead>
               <tbody>${filasHTML}</tbody>
             </table>
+
             <div class="total-row-modal">
               <span class="total-label">Total Hours:</span>
               <span class="total-value">${totalHoras.toFixed(1)}</span>
             </div>
           </div>
+
           <div class="modal-footer">
             <button onclick="descargarDetalle(${id})" class="btn-success">📥 Descargar como PNG</button>
             <button onclick="cerrarModalDetalle()" class="btn-secondary">Volver</button>
@@ -662,12 +716,42 @@ async function verDetallesSemana(id) {
         </div>
       </div>
     `;
+
     if (document.getElementById('modal-detalle')) document.getElementById('modal-detalle').remove();
     document.body.insertAdjacentHTML('beforeend', detalleHTML);
+
   } catch (error) {
     console.error(error);
     alert("Error al cargar los detalles.");
   }
+}
+
+function descargarDetalle(id) {
+  const modal = document.getElementById('modal-detalle');
+  if (!modal) return;
+
+  html2canvas(modal, {
+    scale: 3,
+    backgroundColor: "#ffffff",
+    logging: false,
+    onclone: (clonedDoc) => {
+      const clonedModal = clonedDoc.getElementById('modal-detalle');
+      if (clonedModal) {
+        const footer = clonedModal.querySelector('.modal-footer');
+        if (footer) footer.style.display = 'none';
+
+        clonedModal.style.width = "1150px";
+        clonedModal.style.margin = "0 auto";
+        clonedModal.style.padding = "20px";
+      }
+    }
+  }).then(canvas => {
+    const link = document.createElement("a");
+    const month = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+    link.download = `Detalle_Semana_${month}.png`;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+  });
 }
 
 function cerrarModal() {
@@ -687,7 +771,7 @@ document.addEventListener('keydown', function(e) {
   }
 });
 
-// ==================== INICIO ====================
+// Iniciar la aplicación
 window.onload = () => {
   generarSemana();
   cargarLocal();
