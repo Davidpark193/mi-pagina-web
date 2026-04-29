@@ -206,7 +206,7 @@ function generarSemana() {
   }
 }
 
-// ==================== EL RESTO DE TU CÓDIGO ORIGINAL (NO LO TOQUÉ) ====================
+// ==================== EL RESTO DE TU CÓDIGO ORIGINAL ====================
 function resetearSemanaActual() {
   if (!confirm("¿Reiniciar la semana actual? Se borrará el avance guardado localmente.")) return;
   semanaBase = new Date();
@@ -404,60 +404,139 @@ async function guardarSemana() {
     }
   } catch (error) {
     console.error(error);
-    alert("❌ No se pudo conectar con el servidor.\nAsegúrate de que 'node server/server.js' esté corriendo.");
+    alert("❌ No se pudo conectar con el servidor.");
   }
 }
 
-// ==================== EXPORTAR PNG - ARREGLADO (LIMPIO Y BONITO) ====================
+// ==================== EXPORTAR PNG PRINCIPAL ====================
 function descargar() {
   calcularHoras();
   const capture = document.getElementById("capture");
-
   html2canvas(capture, {
     scale: 3,
     backgroundColor: "#0f172a",
     logging: false,
     onclone: (clonedDoc) => {
       const clonedCapture = clonedDoc.getElementById("capture");
-
-      // Header limpio y bonito
-      const headerHTML = `
-        <div style="padding: 35px 40px 25px; text-align: center; border-bottom: 4px solid #334155;">
-          <div style="font-size: 28px; font-weight: 700; color: #e2e8f0;">Cristian Farez</div>
-          <div style="font-size: 18px; color: #94a3b8; margin-top: 8px;">${document.getElementById("month").value || "APRIL - MAY"}</div>
-        </div>`;
-      clonedCapture.insertAdjacentHTML('afterbegin', headerHTML);
-
-      // Limpiar filas (quitar botones, selects, inputs y círculos)
-      clonedCapture.querySelectorAll("tr").forEach(tr => {
-        const placeCell = tr.cells[1];
-        if (placeCell) {
-          const select = placeCell.querySelector("select");
-          const editable = placeCell.querySelector(".editable");
-          let text = (editable && editable.innerText.trim()) || (select && select.value) || "—";
-          placeCell.innerHTML = `<div style="padding: 16px 20px; font-weight: 600; color: #e2e8f0;">${text}</div>`;
-        }
-
-        const taskCell = tr.cells[2];
-        if (taskCell) {
-          const input = taskCell.querySelector("input");
-          let text = (input && input.value.trim()) || "—";
-          taskCell.innerHTML = `<div style="padding: 16px 20px; color: #e2e8f0;">${text}</div>`;
-        }
-
-        const hoursCell = tr.cells[4];
-        if (hoursCell) {
-          hoursCell.style.fontSize = "1.5rem";
-          hoursCell.style.fontWeight = "700";
-          hoursCell.style.color = "#10b981";
-          hoursCell.style.background = "transparent";
-        }
+      if (!clonedCapture) return;
+      clonedCapture.classList.add("export-mode");
+      clonedCapture.style.width = "auto";
+      clonedCapture.style.minWidth = "1080px";
+      clonedCapture.style.maxWidth = "1380px";
+      clonedCapture.style.margin = "0 auto";
+      clonedCapture.style.padding = "32px 38px";
+      clonedCapture.style.boxSizing = "border-box";
+      clonedCapture.style.fontFamily = "Arial, sans-serif";
+      const tabla = clonedCapture.querySelector("#tabla");
+      if (tabla) {
+        tabla.style.width = "100%";
+        tabla.style.tableLayout = "fixed";
+      }
+      const headers = clonedCapture.querySelectorAll("th");
+      headers.forEach((th) => {
+        th.style.textAlign = "center";
+        th.style.verticalAlign = "middle";
+        th.style.padding = "15px 10px";
+        th.style.fontSize = "15.5px";
+        th.style.fontWeight = "600";
       });
+      limpiarParaExportarClonada(clonedCapture);
+    }
+  })
+    .then(canvas => {
+      const link = document.createElement("a");
+      const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+      link.download = `Payroll_${monthValue}.png`;
+      link.href = canvas.toDataURL("image/png");
+      link.click();
+    })
+    .catch(err => {
+      console.error(err);
+      alert("Hubo un error al generar la imagen.");
+    });
+}
+
+function limpiarParaExportarClonada(captureElement) {
+  const rows = captureElement.querySelectorAll("#tabla tbody tr");
+  rows.forEach(fila => {
+    const select = fila.querySelector("select");
+    const direccion = fila.querySelector(".editable");
+    let textoLugar = (direccion && direccion.innerText.trim()) || (select && select.value) || "HOUSE 34 Seaview Montauk";
+    const divLugar = document.createElement("div");
+    divLugar.style.fontWeight = "600";
+    divLugar.style.fontSize = "14px";
+    divLugar.style.lineHeight = "1.4";
+    divLugar.style.wordBreak = "break-word";
+    divLugar.style.whiteSpace = "normal";
+    divLugar.innerText = textoLugar;
+    fila.cells[1].innerHTML = "";
+    fila.cells[1].appendChild(divLugar);
+
+    const taskInput = fila.querySelector(".task-search-input");
+    if (taskInput) {
+      let taskText = taskInput.value.trim() || "—";
+      const divTask = document.createElement("div");
+      divTask.style.fontWeight = "500";
+      divTask.style.fontSize = "14px";
+      divTask.style.lineHeight = "1.4";
+      divTask.style.wordBreak = "break-word";
+      divTask.style.whiteSpace = "normal";
+      divTask.innerText = taskText;
+      fila.cells[2].innerHTML = "";
+      fila.cells[2].appendChild(divTask);
+    }
+
+    const timeCell = fila.cells[3];
+    const timeText = timeCell.innerText.trim() || "—";
+    const divTime = document.createElement("div");
+    divTime.style.fontWeight = "500";
+    divTime.style.fontSize = "14.5px";
+    divTime.style.textAlign = "center";
+    divTime.innerText = timeText;
+    fila.cells[3].innerHTML = "";
+    fila.cells[3].appendChild(divTime);
+
+    const hoursCell = fila.cells[4];
+    if (hoursCell) {
+      hoursCell.style.fontWeight = "700";
+      hoursCell.style.textAlign = "center";
+    }
+  });
+  const totalEl = captureElement.querySelector("#total");
+  if (totalEl) {
+    totalEl.style.fontSize = "18px";
+    totalEl.style.fontWeight = "bold";
+  }
+}
+
+// ==================== EXPORTAR DETALLE DE SEMANA (ARREGLADO) ====================
+function descargarDetalle(id) {
+  const modal = document.getElementById('modal-detalle');
+  if (!modal) return;
+
+  html2canvas(modal, {
+    scale: 3,
+    backgroundColor: "#0f172a",
+    logging: false,
+    onclone: (clonedDoc) => {
+      const clonedModal = clonedDoc.getElementById('modal-detalle');
+      if (!clonedModal) return;
+
+      // Ocultar footer y botón de cerrar
+      const footer = clonedModal.querySelector('.modal-footer');
+      if (footer) footer.style.display = 'none';
+      const closeBtn = clonedModal.querySelector('.btn-close');
+      if (closeBtn) closeBtn.style.display = 'none';
+
+      clonedModal.style.width = "1150px";
+      clonedModal.style.margin = "0 auto";
+      clonedModal.style.padding = "20px";
+      clonedModal.style.background = "#0f172a";
     }
   }).then(canvas => {
     const link = document.createElement("a");
-    const monthValue = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
-    link.download = `Payroll_${monthValue}.png`;
+    const month = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
+    link.download = `Detalle_Semana_${month}.png`;
     link.href = canvas.toDataURL("image/png");
     link.click();
   });
@@ -589,32 +668,6 @@ async function verDetallesSemana(id) {
     console.error(error);
     alert("Error al cargar los detalles.");
   }
-}
-
-function descargarDetalle(id) {
-  const modal = document.getElementById('modal-detalle');
-  if (!modal) return;
-  html2canvas(modal, {
-    scale: 3,
-    backgroundColor: "#ffffff",
-    logging: false,
-    onclone: (clonedDoc) => {
-      const clonedModal = clonedDoc.getElementById('modal-detalle');
-      if (clonedModal) {
-        const footer = clonedModal.querySelector('.modal-footer');
-        if (footer) footer.style.display = 'none';
-        clonedModal.style.width = "1150px";
-        clonedModal.style.margin = "0 auto";
-        clonedModal.style.padding = "20px";
-      }
-    }
-  }).then(canvas => {
-    const link = document.createElement("a");
-    const month = document.getElementById("month").value.replace(/\s+/g, '_') || "Semana";
-    link.download = `Detalle_Semana_${month}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  });
 }
 
 function cerrarModal() {
