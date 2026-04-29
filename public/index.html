@@ -1,75 +1,97 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Payroll • Weekly Time Sheet</title>
-  <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-  <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payroll • Weekly Time Sheet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+    <link href="https://unpkg.com/aos@2.3.4/dist/aos.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body class="bg-slate-950 text-slate-200 min-h-screen">
+    <header class="fixed top-0 left-0 right-0 z-50 bg-slate-950/90 backdrop-blur-2xl border-b border-slate-800">
+        <div class="max-w-screen-2xl mx-auto px-6 py-5 flex items-center justify-between">
+            <div class="flex items-center gap-x-3">
+                <div class="w-9 h-9 bg-gradient-to-br from-indigo-500 to-violet-500 rounded-3xl flex items-center justify-center">
+                    <i class="fa-solid fa-file-invoice-dollar text-white text-2xl"></i>
+                </div>
+                <h1 class="logo-font text-3xl font-semibold tracking-tighter">Payroll</h1>
+            </div>
 
-  <header class="header">
-    <div class="header-left">
-      <h1>Payroll <span class="dot">•</span> Weekly Time Sheet</h1>
-    </div>
-    
-    <div class="header-actions">
-      <button onclick="resetearSemanaActual()" class="btn btn-secondary">
-        🔄 Semana Actual
-      </button>
-      <button onclick="verSemanasGuardadas()" class="btn btn-secondary">
-        📋 Ver Guardadas
-      </button>
-      <button onclick="guardarSemana()" class="btn btn-primary">
-        💾 Guardar Semana
-      </button>
-      <button onclick="descargar()" class="btn btn-success">
-        ⬇ Exportar PNG
-      </button>
-    </div>
-  </header>
-
-  <div class="container">
-    <div class="card-main" id="capture">
-      
-      <div class="info-bar">
-        <div class="info-group">
-          <div class="info-item">
-            <label>Employee</label>
-            <input type="text" id="employee" value="Cristian Farez" readonly>
-          </div>
-          <div class="info-item">
-            <label>Period</label>
-            <input type="text" id="month" readonly>
-          </div>
+            <div class="flex items-center gap-x-3">
+                <button onclick="resetearSemanaActual()" class="flex items-center gap-x-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 rounded-3xl text-sm font-medium">
+                    <i class="fa-solid fa-rotate-right"></i> Semana Actual
+                </button>
+                <button onclick="verSemanasGuardadas()" class="flex items-center gap-x-2 px-5 py-3 bg-slate-800 hover:bg-slate-700 rounded-3xl text-sm font-medium">
+                    <i class="fa-solid fa-folder-open"></i> Ver Guardadas
+                </button>
+                <button onclick="guardarSemana()" class="flex items-center gap-x-2 px-6 py-3 bg-indigo-600 hover:bg-indigo-500 rounded-3xl text-sm font-semibold">
+                    <i class="fa-solid fa-floppy-disk"></i> Guardar Semana
+                </button>
+                <button onclick="descargar()" class="flex items-center gap-x-2 px-6 py-3 bg-emerald-500 hover:bg-emerald-400 rounded-3xl text-sm font-semibold">
+                    <i class="fa-solid fa-download"></i> Exportar PNG
+                </button>
+                <button onclick="toggleDarkMode()" class="w-10 h-10 flex items-center justify-center rounded-3xl hover:bg-slate-800">
+                    <i id="theme-icon" class="fa-solid fa-moon text-xl"></i>
+                </button>
+            </div>
         </div>
-      </div>
+    </header>
 
-      <div class="table-wrapper">
-        <table id="tabla">
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Place / Location</th>
-              <th>Notes / Task</th>
-              <th>Time</th>
-              <th>Hours</th>
-            </tr>
-          </thead>
-          <tbody id="body"></tbody>
-        </table>
-      </div>
-
-      <div class="total-row" id="total-row">
-        <div class="total-content">
-          <span class="total-label">Total Hours</span>
-          <span id="total" class="total-value" data-total="0">0.0</span>
+    <div class="pt-24 pb-12 max-w-screen-2xl mx-auto px-6">
+        <div class="flex justify-between items-end mb-8" data-aos="fade-up">
+            <div>
+                <h2 id="week-title" class="text-4xl font-semibold logo-font tracking-tighter">Weekly Time Sheet</h2>
+            </div>
+            <div class="flex items-center gap-x-6 text-sm">
+                <div class="flex items-center gap-x-2">
+                    <i class="fa-solid fa-user text-indigo-400"></i>
+                    <div>
+                        <span class="text-slate-400 text-xs">Employee</span>
+                        <p class="font-semibold">Cristian Farez</p>
+                    </div>
+                </div>
+                <div>
+                    <span class="text-slate-400 text-xs">Period</span>
+                    <input id="month" readonly class="bg-transparent font-semibold text-xl focus:outline-none w-48 text-right">
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <script src="script.js"></script>
+        <div id="capture" class="card-main rounded-3xl p-6 shadow-2xl overflow-hidden">
+            <div class="overflow-x-auto">
+                <table id="tabla" class="w-full min-w-[1000px]">
+                    <thead>
+                        <tr>
+                            <th class="px-6 py-5 text-left">DATE</th>
+                            <th class="px-6 py-5 text-left">PLACE / LOCATION</th>
+                            <th class="px-6 py-5 text-left">NOTES / TASK</th>
+                            <th class="px-6 py-5 text-center">TIME</th>
+                            <th class="px-6 py-5 text-center">HOURS</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body" class="text-slate-200"></tbody>
+                </table>
+            </div>
+
+            <div id="total-row" class="total-row mt-1 rounded-b-3xl py-6 px-8 flex items-center justify-center gap-x-6 text-white">
+                <span class="text-xl font-medium">TOTAL HOURS</span>
+                <div id="total" class="text-5xl font-bold logo-font" data-total="0">0.0</div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="bg-black/50 py-6 text-xs text-slate-400">
+        <div class="max-w-screen-2xl mx-auto px-6 flex justify-between">
+            <div>© 2026 Cristian Farez • Payroll System</div>
+            <div>Made with precision</div>
+        </div>
+    </footer>
+
+    <script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
