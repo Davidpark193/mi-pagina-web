@@ -9,22 +9,38 @@
 </head>
 <body>
 
-  <div class="header">
-    <h1>Payroll • Weekly Time Sheet</h1>
-  </div>
-  
+  <header class="header">
+    <div class="header-left">
+      <h1>Payroll <span class="dot">•</span> Weekly Time Sheet</h1>
+    </div>
+    
+    <div class="header-actions">
+      <button onclick="resetearSemanaActual()" class="btn btn-secondary">
+        🔄 Semana Actual
+      </button>
+      <button onclick="verSemanasGuardadas()" class="btn btn-secondary">
+        📋 Ver Guardadas
+      </button>
+      <button onclick="guardarSemana()" class="btn btn-primary">
+        💾 Guardar Semana
+      </button>
+      <button onclick="descargar()" class="btn btn-success">
+        ⬇ Exportar PNG
+      </button>
+    </div>
+  </header>
+
   <div class="container">
     <div class="card-main" id="capture">
-    
+      
       <div class="info-bar">
         <div class="info-group">
           <div class="info-item">
             <label>Employee</label>
             <input type="text" id="employee" value="Cristian Farez" readonly>
           </div>
-
           <div class="info-item">
-            <label>Month</label>
+            <label>Period</label>
             <input type="text" id="month" readonly>
           </div>
         </div>
@@ -47,17 +63,10 @@
 
       <div class="total-row" id="total-row">
         <div class="total-content">
-          <span class="total-label">Total Hours:</span>
+          <span class="total-label">Total Hours</span>
           <span id="total" class="total-value" data-total="0">0.0</span>
         </div>
       </div>
-    </div>
-
-    <div class="bottom-actions">
-      <button onclick="resetearSemanaActual()" class="btn-reset">🔄 Semana Actual</button>
-      <button class="btn-primary" onclick="guardarSemana()">💾 Guardar Semana</button>
-      <button onclick="verSemanasGuardadas()" class="btn-view">📋 Ver Semanas Guardadas</button>
-      <button class="btn-success" onclick="descargar()">⬇ Exportar PNG</button>
     </div>
   </div>
 
