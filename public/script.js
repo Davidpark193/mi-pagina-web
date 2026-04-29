@@ -777,3 +777,4 @@ window.onload = () => {
   cargarLocal();
   activarAutoGuardado();
 };
+
