@@ -22,23 +22,55 @@ th {
 
 tr:hover { background: rgba(99,102,241,0.08); }
 
+/* HORAS - LIMPIO Y ELEGANTE */
+.horas {
+    font-weight: 700;
+    text-align: center;
+    font-size: 1.35rem;
+    color: #10b981;
+    background: rgba(16,185,129,0.1);
+    border-radius: 9999px;
+    padding: 8px 16px;
+    min-width: 80px;
+}
+
+/* TASK DROPDOWN */
 .task-search-input {
     background: rgba(255,255,255,0.08);
     border: 1px solid rgba(148,163,184,0.3);
     border-radius: 9999px;
-    padding: 12px 18px;
+    padding: 12px 20px;
     width: 100%;
+    color: #e2e8f0;
 }
 
 .task-search-input:focus {
     border-color: #6366f1;
-    box-shadow: 0 0 0 4px rgba(99,102,241,0.2);
+    box-shadow: 0 0 0 4px rgba(99,102,241,0.25);
 }
 
-.total-row {
-    background: linear-gradient(90deg, #1e2937, #334155);
+.task-options {
+    background: rgba(15,23,42,0.98);
+    border: 1px solid rgba(99,102,241,0.3);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px -12px rgb(0 0 0 / 0.4);
+    max-height: 320px;
+    overflow-y: auto;
+    z-index: 9999;
 }
 
+.task-option {
+    padding: 12px 20px;
+    cursor: pointer;
+    color: #e2e8f0;
+}
+
+.task-option:hover {
+    background: #6366f1;
+    color: white;
+}
+
+/* PLACE + GEOLOCATION */
 .loc-btn {
     background: #10b981;
     color: white;
@@ -47,22 +79,18 @@ tr:hover { background: rgba(99,102,241,0.08); }
     height: 42px;
     border-radius: 9999px;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
-.horas {
-    font-weight: 700;
-    text-align: center;
-    background: rgba(16,185,129,0.1);
+.editable {
+    background: rgba(255,255,255,0.05);
     border-radius: 9999px;
+    padding: 10px 16px;
+    min-height: 42px;
+    margin-top: 8px;
 }
 
-/* Evita que las líneas sean demasiado anchas */
-table {
-    table-layout: fixed;
-}
-
-td, th {
-    white-space: normal;
-    word-break: break-word;
-    overflow: hidden;
+/* Total row */
+.total-row {
+    background: linear-gradient(90deg, #1e2937, #334155);
 }
