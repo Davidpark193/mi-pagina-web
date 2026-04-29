@@ -799,3 +799,86 @@ select {
   }
 
 }
+
+.table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.bottom-actions {
+  max-width: 1280px;
+  margin: 20px auto 40px;
+  padding: 0 20px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+#tabla {
+  table-layout: fixed;
+}
+
+#tabla th:nth-child(1),
+#tabla td:nth-child(1) { width: 16%; }
+
+#tabla th:nth-child(2),
+#tabla td:nth-child(2) { width: 28%; }
+
+#tabla th:nth-child(3),
+#tabla td:nth-child(3) { width: 28%; }
+
+#tabla th:nth-child(4),
+#tabla td:nth-child(4) { width: 20%; }
+
+#tabla th:nth-child(5),
+#tabla td:nth-child(5) {
+  width: 8%;
+  text-align: center;
+}
+
+.place-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.place-box select {
+  width: 100%;
+  min-width: 0;
+}
+
+.loc-btn {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+}
+
+.task-search-input {
+  min-height: 48px;
+  white-space: normal;
+  word-break: break-word;
+  line-height: 1.4;
+}
+
+td .editable {
+  white-space: normal;
+  word-break: break-word;
+}
+
+@media (max-width: 768px) {
+  .card-main {
+    min-width: 1050px;
+  }
+
+  .bottom-actions {
+    justify-content: flex-start;
+    overflow-x: auto;
+    flex-wrap: nowrap;
+  }
+
+  .bottom-actions button {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}
